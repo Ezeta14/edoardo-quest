@@ -1,592 +1,966 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRight, Star, Trophy } from 'lucide-react';
 
-const EdoardoGame = () => {
-  const [stage, setStage] = useState(0);
-  const [score, setScore] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [miniGameActive, setMiniGameActive] = useState(false);
-  const [miniGameComplete, setMiniGameComplete] = useState(false);
-  
-  // Mini-game states
-  const [catchGame, setCatchGame] = useState({ items: [], caught: 0, target: 8 });
-  const [whackGame, setWhackGame] = useState({ moles: [], score: 0, target: 15 });
-  const [tetrisGame, setTetrisGame] = useState({ 
-    board: Array(12).fill(null).map(() => Array(8).fill(0)),
-    currentPiece: null,
-    pieceX: 3,
-    pieceY: 0,
-    linesCleared: 0,
-    target: 3
-  });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edoardo's Quest: From Milan to Marketing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-  const stages = [
-    {
-      title: "CHAPTER 1: THE ORIGIN",
-      subtitle: "Italy → UK 🎭",
-      description: "Our story begins in Milan! Edoardo grew up in a big Italian family — mum, dad, a younger brother Ricky (Gen Z alert), and a whopping 14 cousins. Sunday lunches were harder to escape than the final boss of Super Mario.",
-      skills: ["Drama Studies", "Cultural Adaptation", "Creative Performance"],
-      color: "#00ff00",
-      miniGame: "catch",
-      miniGameInstructions: "Catch 8 falling pizzas! 🍕 Click or use arrow keys!",
-      image: "duomo"
-    },
-    {
-      title: "CHAPTER 2: THE SHIFT",
-      subtitle: "Hospitality → Digital (Pre-COVID)",
-      description: "Working in hospitality, then pivoting to digital marketing and e-commerce before COVID changed everything. A bold career transformation!",
-      skills: ["Career Transition", "Digital Marketing", "Resilience"],
-      color: "#00ffff",
-      miniGame: "whack",
-      miniGameInstructions: "Whack 15 moles! Click the moles before they disappear!",
-      image: "lanyard"
-    },
-    {
-      title: "CHAPTER 3: THE GROWTH",
-      subtitle: "Diageo - Present Day 🚀",
-      description: "End to End Marketing Manager at Diageo One - mastering customer journeys, data-driven decisions, and building loyalty programs for world-class spirits brands!",
-      skills: ["Customer Journeys", "Data-Driven Strategy", "Marketing Leadership"],
-      color: "#ff00ff",
-      miniGame: "tetris",
-      miniGameInstructions: "Clear 3 lines in Tetris! Arrow keys to move/rotate!",
-      image: "fishing"
-    }
-  ];
-
-  const currentStage = stages[stage];
-
-  // Image URLs - replace with your actual image URLs
-  const images = {
-    duomo: 'https://ibb.co/V0Vdz632',
-    lanyard: 'YOUR_LANYARD_IMAGE_URL',
-    fishing: 'YOUR_FISHING_IMAGE_URL',
-    face: 'YOUR_FACE_IMAGE_URL' // For whack-a-mole
-  };
-
-  // CATCH GAME LOGIC
-  const initCatchGame = () => {
-    setCatchGame({ items: [], caught: 0, target: 8 });
-  };
-
-  useEffect(() => {
-    if (miniGameActive && currentStage.miniGame === 'catch') {
-      const interval = setInterval(() => {
-        if (catchGame.caught < catchGame.target) {
-          setCatchGame(prev => ({
-            ...prev,
-            items: [...prev.items, { id: Date.now() + Math.random(), x: Math.random() * 80 + 10, y: 0 }]
-          }));
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }, 1200);
-      return () => clearInterval(interval);
-    }
-  }, [miniGameActive, catchGame.caught, currentStage.miniGame]);
 
-  useEffect(() => {
-    if (miniGameActive && currentStage.miniGame === 'catch') {
-      const interval = setInterval(() => {
-        setCatchGame(prev => ({
-          ...prev,
-          items: prev.items.map(item => ({ ...item, y: item.y + 2.5 })).filter(item => item.y < 100)
-        }));
-      }, 50);
-      return () => clearInterval(interval);
-    }
-  }, [miniGameActive, currentStage.miniGame]);
-
-  const catchItem = (id) => {
-    setCatchGame(prev => {
-      const newCaught = prev.caught + 1;
-      if (newCaught >= prev.target) {
-        completeMiniGame();
-      }
-      return {
-        ...prev,
-        items: prev.items.filter(item => item.id !== id),
-        caught: newCaught
-      };
-    });
-  };
-
-  // WHACK-A-MOLE GAME LOGIC
-  const initWhackGame = () => {
-    setWhackGame({ moles: [], score: 0, target: 15 });
-  };
-
-  useEffect(() => {
-    if (miniGameActive && currentStage.miniGame === 'whack') {
-      const interval = setInterval(() => {
-        if (whackGame.score < whackGame.target) {
-          const position = Math.floor(Math.random() * 9);
-          setWhackGame(prev => ({
-            ...prev,
-            moles: [...prev.moles, { id: Date.now(), position, visible: true }]
-          }));
-
-          setTimeout(() => {
-            setWhackGame(prev => ({
-              ...prev,
-              moles: prev.moles.filter(m => m.id !== Date.now())
-            }));
-          }, 1500);
+        body {
+            background: #1a1a2e;
+            font-family: 'Press Start 2P', cursive;
+            color: #eee;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-      }, 800);
-      return () => clearInterval(interval);
-    }
-  }, [miniGameActive, whackGame.score, currentStage.miniGame]);
 
-  const whackMole = (id) => {
-    setWhackGame(prev => {
-      const newScore = prev.score + 1;
-      if (newScore >= prev.target) {
-        completeMiniGame();
-      }
-      return {
-        ...prev,
-        moles: prev.moles.filter(m => m.id !== id),
-        score: newScore
-      };
-    });
-  };
-
-  // TETRIS GAME LOGIC
-  const tetrisPieces = [
-    [[1,1,1,1]], // I
-    [[1,1],[1,1]], // O
-    [[1,1,1],[0,1,0]], // T
-    [[1,1,0],[0,1,1]], // S
-    [[0,1,1],[1,1,0]], // Z
-    [[1,1,1],[1,0,0]], // L
-    [[1,1,1],[0,0,1]], // J
-  ];
-
-  const initTetrisGame = () => {
-    const newPiece = tetrisPieces[Math.floor(Math.random() * tetrisPieces.length)];
-    setTetrisGame({
-      board: Array(12).fill(null).map(() => Array(8).fill(0)),
-      currentPiece: newPiece,
-      pieceX: 3,
-      pieceY: 0,
-      linesCleared: 0,
-      target: 3
-    });
-  };
-
-  useEffect(() => {
-    if (miniGameActive && currentStage.miniGame === 'tetris' && tetrisGame.currentPiece) {
-      const interval = setInterval(() => {
-        moveTetrisPiece('down');
-      }, 600);
-      return () => clearInterval(interval);
-    }
-  }, [miniGameActive, currentStage.miniGame, tetrisGame]);
-
-  useEffect(() => {
-    if (miniGameActive && currentStage.miniGame === 'tetris') {
-      const handleTetrisKey = (e) => {
-        if (e.key === 'ArrowLeft') moveTetrisPiece('left');
-        if (e.key === 'ArrowRight') moveTetrisPiece('right');
-        if (e.key === 'ArrowDown') moveTetrisPiece('down');
-        if (e.key === 'ArrowUp') rotateTetrisPiece();
-      };
-      window.addEventListener('keydown', handleTetrisKey);
-      return () => window.removeEventListener('keydown', handleTetrisKey);
-    }
-  }, [miniGameActive, currentStage.miniGame, tetrisGame]);
-
-  const canMovePiece = (newX, newY, piece = tetrisGame.currentPiece) => {
-    for (let y = 0; y < piece.length; y++) {
-      for (let x = 0; x < piece[y].length; x++) {
-        if (piece[y][x]) {
-          const boardX = newX + x;
-          const boardY = newY + y;
-          if (boardX < 0 || boardX >= 8 || boardY >= 12) return false;
-          if (boardY >= 0 && tetrisGame.board[boardY][boardX]) return false;
+        #game-container {
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
+            border: 4px solid #e94560;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px #e94560, inset 0 0 50px rgba(233,69,96,0.1);
         }
-      }
-    }
-    return true;
-  };
 
-  const moveTetrisPiece = (direction) => {
-    let newX = tetrisGame.pieceX;
-    let newY = tetrisGame.pieceY;
-
-    if (direction === 'left') newX--;
-    if (direction === 'right') newX++;
-    if (direction === 'down') newY++;
-
-    if (canMovePiece(newX, newY)) {
-      setTetrisGame(prev => ({ ...prev, pieceX: newX, pieceY: newY }));
-    } else if (direction === 'down') {
-      lockPiece();
-    }
-  };
-
-  const rotateTetrisPiece = () => {
-    const rotated = tetrisGame.currentPiece[0].map((_, i) =>
-      tetrisGame.currentPiece.map(row => row[i]).reverse()
-    );
-    if (canMovePiece(tetrisGame.pieceX, tetrisGame.pieceY, rotated)) {
-      setTetrisGame(prev => ({ ...prev, currentPiece: rotated }));
-    }
-  };
-
-  const lockPiece = () => {
-    const newBoard = tetrisGame.board.map(row => [...row]);
-    tetrisGame.currentPiece.forEach((row, y) => {
-      row.forEach((cell, x) => {
-        if (cell) {
-          const boardY = tetrisGame.pieceY + y;
-          const boardX = tetrisGame.pieceX + x;
-          if (boardY >= 0 && boardY < 12 && boardX >= 0 && boardX < 8) {
-            newBoard[boardY][boardX] = 1;
-          }
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
         }
-      });
-    });
 
-    let linesCleared = 0;
-    const clearedBoard = newBoard.filter(row => {
-      if (row.every(cell => cell === 1)) {
-        linesCleared++;
-        return false;
-      }
-      return true;
-    });
+        .screen.active {
+            display: flex;
+        }
 
-    while (clearedBoard.length < 12) {
-      clearedBoard.unshift(Array(8).fill(0));
-    }
+        h1 {
+            font-size: 18px;
+            color: #e94560;
+            text-shadow: 2px 2px #0f3460;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
 
-    const newLinesCleared = tetrisGame.linesCleared + linesCleared;
+        h2 {
+            font-size: 14px;
+            color: #f9d923;
+            margin-bottom: 15px;
+        }
 
-    if (newLinesCleared >= tetrisGame.target) {
-      completeMiniGame();
-      return;
-    }
+        p, .dialogue {
+            font-size: 10px;
+            line-height: 2;
+            margin: 10px 0;
+            max-width: 700px;
+        }
 
-    const newPiece = tetrisPieces[Math.floor(Math.random() * tetrisPieces.length)];
-    setTetrisGame({
-      board: clearedBoard,
-      currentPiece: newPiece,
-      pieceX: 3,
-      pieceY: 0,
-      linesCleared: newLinesCleared,
-      target: tetrisGame.target
-    });
-  };
+        .blink {
+            animation: blink 1s infinite;
+        }
 
-  const startMiniGame = () => {
-    setMiniGameActive(true);
-    setMiniGameComplete(false);
-    
-    switch (currentStage.miniGame) {
-      case 'catch': initCatchGame(); break;
-      case 'whack': initWhackGame(); break;
-      case 'tetris': initTetrisGame(); break;
-    }
-  };
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
 
-  const completeMiniGame = () => {
-    setMiniGameComplete(true);
-    setScore(score + 1000);
-    setTimeout(() => {
-      setMiniGameActive(false);
-    }, 1000);
-  };
+        .btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            padding: 15px 30px;
+            margin: 10px;
+            background: #0f3460;
+            color: #eee;
+            border: 3px solid #e94560;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-  const nextStage = () => {
-    if (stage < stages.length - 1) {
-      setStage(stage + 1);
-      setMiniGameComplete(false);
-    }
-  };
+        .btn:hover {
+            background: #e94560;
+            transform: scale(1.05);
+        }
 
-  const startGame = () => {
-    setGameStarted(true);
-    setStage(0);
-    setScore(0);
-  };
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-  if (!gameStarted) {
-    return (
-      <div className="w-full h-screen bg-black flex items-center justify-center p-4 font-mono overflow-auto">
-        <div className="text-center max-w-2xl">
-          <div className="mb-8 text-6xl animate-pulse">🎮</div>
-          <h1 className="text-5xl font-bold mb-4 text-green-400" style={{textShadow: '4px 4px 0 #000'}}>
-            MEET EDOARDO
-          </h1>
-          <h2 className="text-2xl mb-8 text-cyan-400">THE RETRO QUEST</h2>
-          <div className="bg-purple-900 border-4 border-purple-400 p-6 mb-8">
-            <p className="text-white text-lg mb-4">
-              Play through 3 chapters of Edoardo's journey from Italy to Diageo!
-            </p>
-            <div className="text-yellow-300 text-sm">
-              <p>🍕 Chapter 1: Catch Pizzas</p>
-              <p>🔨 Chapter 2: Whack-a-Mole</p>
-              <p>🎮 Chapter 3: Tetris Challenge</p>
+        .btn:disabled:hover {
+            background: #0f3460;
+            transform: none;
+        }
+
+        /* Pixel Art Characters */
+        .pixel-scene {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 60%, #228b22 60%, #228b22 100%);
+            position: relative;
+            margin: 20px 0;
+            border: 3px solid #333;
+            image-rendering: pixelated;
+        }
+
+        .pixel-scene.london {
+            background: linear-gradient(180deg, #708090 0%, #708090 60%, #4a4a4a 60%, #4a4a4a 100%);
+        }
+
+        .pixel-scene.modern {
+            background: linear-gradient(180deg, #2c3e50 0%, #2c3e50 60%, #34495e 60%, #34495e 100%);
+        }
+
+        .building {
+            position: absolute;
+            bottom: 0;
+            background: #8b4513;
+            border: 2px solid #5d3a1a;
+        }
+
+        .sun {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            width: 40px;
+            height: 40px;
+            background: #f9d923;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f9d923;
+        }
+
+        /* Mini-game styles */
+        #pizza-game, #bartender-game, #quiz-game {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: #0f3460;
+            border-bottom: 3px solid #e94560;
+        }
+
+        .game-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Pizza Game */
+        .pizza-table {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .cousin {
+            width: 80px;
+            height: 100px;
+            background: #0f3460;
+            border: 3px solid #e94560;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .cousin:hover {
+            transform: scale(1.1);
+        }
+
+        .cousin.correct {
+            background: #228b22;
+            animation: pulse 0.5s;
+        }
+
+        .cousin.wrong {
+            background: #dc143c;
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .cousin-face {
+            font-size: 24px;
+        }
+
+        .cousin-want {
+            font-size: 20px;
+            margin-top: 5px;
+        }
+
+        .pizza-belt {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: #333;
+            border: 3px solid #666;
+            margin-top: 20px;
+        }
+
+        .pizza-item {
+            font-size: 32px;
+            cursor: grab;
+            transition: transform 0.2s;
+            padding: 5px;
+        }
+
+        .pizza-item:hover {
+            transform: scale(1.2);
+        }
+
+        .pizza-item.selected {
+            background: #e94560;
+            border-radius: 8px;
+        }
+
+        /* Bartender Game */
+        .drink-orders {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .order {
+            padding: 10px 15px;
+            background: #0f3460;
+            border: 2px solid #e94560;
+            font-size: 10px;
+        }
+
+        .order.completed {
+            background: #228b22;
+        }
+
+        .ingredients {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .ingredient {
+            font-size: 28px;
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .ingredient:hover {
+            border-color: #e94560;
+            transform: scale(1.1);
+        }
+
+        .mixing-area {
+            min-height: 60px;
+            min-width: 200px;
+            background: #1a1a2e;
+            border: 3px dashed #e94560;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            gap: 5px;
+        }
+
+        /* Quiz Game */
+        .quiz-question {
+            font-size: 11px;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .quiz-option {
+            padding: 12px 20px;
+            background: #0f3460;
+            border: 2px solid #e94560;
+            cursor: pointer;
+            font-size: 9px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: #e94560;
+        }
+
+        .quiz-option.correct {
+            background: #228b22;
+            border-color: #228b22;
+        }
+
+        .quiz-option.wrong {
+            background: #dc143c;
+            border-color: #dc143c;
+        }
+
+        .score-display {
+            font-size: 12px;
+            color: #f9d923;
+        }
+
+        /* Photo Modal */
+        .photo-modal {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .photo-modal.active {
+            display: flex;
+        }
+
+        .photo-placeholder {
+            width: 400px;
+            height: 300px;
+            background: #333;
+            border: 4px solid #e94560;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: 20px;
+        }
+
+        .photo-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .photo-text {
+            font-size: 10px;
+            color: #888;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .level-indicator {
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border: 2px solid #e94560;
+        }
+
+        .level-indicator.complete {
+            background: #228b22;
+        }
+
+        .level-indicator.current {
+            background: #f9d923;
+        }
+
+        /* Dialogue Box */
+        .dialogue-box {
+            background: #0f3460;
+            border: 3px solid #e94560;
+            padding: 20px;
+            margin: 15px 0;
+            max-width: 700px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .dialogue-box p {
+            margin: 8px 0;
+        }
+
+        /* Timer */
+        .timer {
+            font-size: 14px;
+            color: #f9d923;
+        }
+
+        .timer.warning {
+            color: #e94560;
+            animation: blink 0.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- START SCREEN -->
+        <div id="start-screen" class="screen active">
+            <h1>🎮 EDOARDO'S QUEST 🎮<br><span style="font-size:12px; color:#f9d923;">From Milan to Marketing</span></h1>
+            <div class="pixel-scene">
+                <div class="sun"></div>
+                <div class="building" style="left:50px; width:60px; height:80px;"></div>
+                <div class="building" style="left:130px; width:80px; height:100px; background:#a0522d;"></div>
+                <div class="building" style="left:230px; width:50px; height:70px;"></div>
+                <div class="building" style="right:100px; width:100px; height:90px; background:#696969;"></div>
+                <div class="building" style="right:30px; width:60px; height:110px; background:#778899;"></div>
             </div>
-          </div>
-          <button
-            onClick={startGame}
-            className="bg-green-500 hover:bg-green-600 text-black font-bold text-2xl px-12 py-4 border-4 border-green-300"
-          >
-            PRESS START
-          </button>
+            <p>An interactive journey through the life of Edoardo</p>
+            <p class="blink" style="color:#f9d923; margin-top:30px;">PRESS START</p>
+            <button class="btn" onclick="startGame()">START</button>
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="w-full h-screen bg-black overflow-hidden font-mono">
-      <div className="absolute inset-0 pointer-events-none" 
-           style={{
-             background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px)',
-             zIndex: 50
-           }}
-      />
-      
-      <div className="absolute top-4 left-4 text-yellow-300 text-2xl z-10 bg-black bg-opacity-70 px-4 py-2 border-2 border-yellow-300">
-        SCORE: {score.toString().padStart(6, '0')}
-      </div>
-
-      <div className="absolute top-4 right-4 text-cyan-300 text-2xl z-10 bg-black bg-opacity-70 px-4 py-2 border-2 border-cyan-300">
-        CHAPTER {stage + 1}/3
-      </div>
-
-      {!miniGameActive && !miniGameComplete && (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 overflow-auto">
-          <div 
-            className="text-4xl font-bold mb-2 text-center"
-            style={{color: currentStage.color, textShadow: '4px 4px 0 #000'}}
-          >
-            {currentStage.title}
-          </div>
-          
-          <div className="text-xl mb-8 text-white text-center" style={{textShadow: '2px 2px 0 #000'}}>
-            {currentStage.subtitle}
-          </div>
-
-          <div 
-            className="max-w-3xl w-full border-4 p-6 mb-8 bg-opacity-90"
-            style={{
-              borderColor: currentStage.color,
-              backgroundColor: '#1a1a2e',
-              boxShadow: `0 0 20px ${currentStage.color}40`
-            }}
-          >
-            <p className="text-white text-xl mb-6 text-center">
-              🔒 <strong>LOCKED</strong> 🔒
-            </p>
-            <p className="text-gray-400 text-center mb-4">
-              Complete the mini-game to unlock this chapter!
-            </p>
-            <p className="text-cyan-400 text-center text-sm">
-              {currentStage.miniGameInstructions}
-            </p>
-          </div>
-
-          <button
-            onClick={startMiniGame}
-            className="bg-green-500 hover:bg-green-600 text-black font-bold text-2xl px-12 py-4 border-4 border-green-300 animate-pulse"
-          >
-            START MINI-GAME
-          </button>
-        </div>
-      )}
-
-      {miniGameActive && currentStage.miniGame === 'catch' && (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8">
-          <h3 className="text-3xl text-white mb-4">Catch the Pizzas! 🍕</h3>
-          <p className="text-xl text-green-400 mb-4">Caught: {catchGame.caught}/{catchGame.target}</p>
-          <div className="relative w-full max-w-2xl h-96 border-4 border-green-500 bg-gray-900 overflow-hidden">
-            {catchGame.items.map(item => (
-              <div
-                key={item.id}
-                onClick={() => catchItem(item.id)}
-                className="absolute text-4xl cursor-pointer hover:scale-125 transition-transform"
-                style={{ left: `${item.x}%`, top: `${item.y}%` }}
-              >
-                🍕
-              </div>
-            ))}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-5xl">
-              👨‍🍳
+        <!-- LEVEL SELECT -->
+        <div id="level-select" class="screen">
+            <h1>SELECT LEVEL</h1>
+            <div style="display:flex; gap:20px; margin-top:30px;">
+                <button class="btn" id="level1-btn" onclick="startLevel(1)">LEVEL 1<br><span style="font-size:8px;">Italian Origins</span></button>
+                <button class="btn" id="level2-btn" onclick="startLevel(2)" disabled>LEVEL 2<br><span style="font-size:8px;">London Leap</span></button>
+                <button class="btn" id="level3-btn" onclick="startLevel(3)" disabled>LEVEL 3<br><span style="font-size:8px;">Life Today</span></button>
             </div>
-          </div>
         </div>
-      )}
 
-      {miniGameActive && currentStage.miniGame === 'whack' && (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8">
-          <h3 className="text-3xl text-white mb-4">Whack-a-Mole! 🔨</h3>
-          <p className="text-xl text-cyan-400 mb-4">Score: {whackGame.score}/{whackGame.target}</p>
-          <div className="grid grid-cols-3 gap-4 max-w-md">
-            {Array.from({ length: 9 }, (_, i) => {
-              const mole = whackGame.moles.find(m => m.position === i && m.visible);
-              return (
-                <div
-                  key={i}
-                  onClick={() => mole && whackMole(mole.id)}
-                  className="w-24 h-24 border-4 border-cyan-500 bg-brown-800 rounded-full flex items-center justify-center cursor-pointer hover:bg-brown-700 overflow-hidden"
-                  style={{backgroundColor: '#654321'}}
-                >
-                  {mole ? (
-                    images.face ? (
-                      <img 
-                        src={images.face} 
-                        alt="Whack Edoardo" 
-                        className="w-full h-full object-cover"
-                        style={{imageRendering: 'pixelated', filter: 'contrast(1.2)'}}
-                      />
-                    ) : (
-                      <span className="text-4xl">😄</span>
-                    )
-                  ) : (
-                    <span className="text-4xl">🕳️</span>
-                  )}
+        <!-- LEVEL 1: INTRO -->
+        <div id="level1-intro" class="screen">
+            <h2>LEVEL 1: THE ITALIAN ORIGINS</h2>
+            <div class="pixel-scene">
+                <div class="sun"></div>
+                <div class="building" style="left:50px; width:100px; height:80px; background:#d2691e;"></div>
+                <div class="building" style="left:170px; width:120px; height:100px; background:#8b4513;">
+                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:8px; color:#f9d923;">THE FRIENDS PUB</div>
                 </div>
-              );
-            })}
-          </div>
+                <div class="building" style="right:50px; width:80px; height:90px; background:#a0522d;"></div>
+            </div>
+            <div class="dialogue-box">
+                <p>🇮🇹 Benvenuti in Milan! This is where Edoardo's story begins.</p>
+                <p>👨‍👩‍👦‍👦 He grew up in a big Italian family: mum, dad, younger brother Ricky (Gen Z alert), and 14 cousins!</p>
+                <p>📚 In Milan, he studied mechanical engineering while working at the family pub, "The Friends".</p>
+                <p>🍸 He even got certified as a bartender!</p>
+            </div>
+            <button class="btn" onclick="startMiniGame(1)">START MINI-GAME: PIZZA DASH</button>
         </div>
-      )}
 
-      {miniGameActive && currentStage.miniGame === 'tetris' && (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8">
-          <h3 className="text-3xl text-white mb-4">Tetris Challenge! 🎮</h3>
-          <p className="text-xl text-pink-400 mb-4">Lines: {tetrisGame.linesCleared}/{tetrisGame.target}</p>
-          <p className="text-sm text-gray-400 mb-2">Arrow Keys: ← → ↓ ↑(rotate)</p>
-          <div className="border-4 border-pink-500 bg-black p-2">
-            {tetrisGame.board.map((row, y) => (
-              <div key={y} className="flex">
-                {row.map((cell, x) => {
-                  let isCurrentPiece = false;
-                  if (tetrisGame.currentPiece) {
-                    tetrisGame.currentPiece.forEach((pieceRow, py) => {
-                      pieceRow.forEach((pieceCell, px) => {
-                        if (pieceCell && 
-                            tetrisGame.pieceY + py === y && 
-                            tetrisGame.pieceX + px === x) {
-                          isCurrentPiece = true;
-                        }
-                      });
-                    });
-                  }
-                  
-                  return (
-                    <div
-                      key={x}
-                      className="w-6 h-6 border border-gray-700"
-                      style={{
-                        backgroundColor: isCurrentPiece ? '#ff00ff' : (cell ? '#00ff00' : '#000')
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {miniGameComplete && !miniGameActive && (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 overflow-auto">
-          <div 
-            className="text-4xl font-bold mb-2 text-center animate-pulse"
-            style={{color: currentStage.color, textShadow: '4px 4px 0 #000'}}
-          >
-            ✨ UNLOCKED! ✨
-          </div>
-          
-          <div 
-            className="text-3xl font-bold mb-2 text-center"
-            style={{color: currentStage.color, textShadow: '4px 4px 0 #000'}}
-          >
-            {currentStage.title}
-          </div>
-          
-          <div className="text-xl mb-6 text-white text-center" style={{textShadow: '2px 2px 0 #000'}}>
-            {currentStage.subtitle}
-          </div>
-
-          {/* Personal Photo */}
-          <div className="mb-6 border-4 border-white p-2 bg-gray-900">
-            {stage === 0 && images.duomo && (
-              <img src={images.duomo} alt="Milan Duomo" className="w-64 h-64 object-cover" />
-            )}
-            {stage === 1 && images.lanyard && (
-              <img src={images.lanyard} alt="Diageo Lanyard" className="w-64 h-64 object-cover" />
-            )}
-            {stage === 2 && images.fishing && (
-              <img src={images.fishing} alt="Fishing in Norway" className="w-64 h-64 object-cover" />
-            )}
-            {!((stage === 0 && images.duomo) || (stage === 1 && images.lanyard) || (stage === 2 && images.fishing)) && (
-              <div className="w-64 h-64 bg-gray-800 flex items-center justify-center text-6xl">
-                {stage === 0 && '🏛️'}
-                {stage === 1 && '🎭'}
-                {stage === 2 && '🎣'}
-              </div>
-            )}
-            <p className="text-center text-gray-400 text-sm mt-2">
-              {stage === 0 && 'Milan Duomo - Italian roots'}
-              {stage === 1 && 'Career transition era'}
-              {stage === 2 && 'Work-life balance at Diageo'}
-            </p>
-          </div>
-
-          <div 
-            className="max-w-3xl w-full border-4 p-6 mb-8 bg-opacity-90 relative"
-            style={{
-              borderColor: currentStage.color,
-              backgroundColor: '#1a1a2e',
-              boxShadow: `0 0 20px ${currentStage.color}40`
-            }}
-          >
-            <p className="text-white text-lg leading-relaxed mb-6">
-              {currentStage.description}
-            </p>
-
-            <div className="flex flex-wrap gap-3 justify-center">
-              {currentStage.skills.map((skill, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-2 border-2 font-bold text-sm flex items-center gap-2"
-                  style={{
-                    backgroundColor: currentStage.color + '20',
-                    borderColor: currentStage.color,
-                    color: currentStage.color
-                  }}
-                >
-                  <Star size={16} fill={currentStage.color} />
-                  {skill}
+        <!-- LEVEL 1: MINI-GAME (PIZZA) -->
+        <div id="level1-game" class="screen">
+            <div id="pizza-game">
+                <div class="game-header">
+                    <span>LEVEL 1: PIZZA DASH</span>
+                    <span class="timer" id="pizza-timer">⏱️ 30s</span>
+                    <span class="score-display" id="pizza-score">Score: 0/5</span>
                 </div>
-              ))}
+                <div class="game-area">
+                    <p>Click a pizza, then click the cousin who wants it!</p>
+                    <div class="pizza-table" id="cousins-container"></div>
+                    <div class="pizza-belt" id="pizza-belt"></div>
+                </div>
             </div>
-          </div>
-
-          {stage < stages.length - 1 ? (
-            <button
-              onClick={nextStage}
-              className="bg-green-500 hover:bg-green-600 text-black font-bold text-2xl px-12 py-4 border-4 border-green-300 flex items-center gap-2"
-            >
-              NEXT CHAPTER <ArrowRight />
-            </button>
-          ) : (
-            <div className="text-center">
-              <div className="text-6xl mb-4 animate-bounce">🏆</div>
-              <p className="text-green-400 text-3xl font-bold mb-2">GAME COMPLETE!</p>
-              <p className="text-white text-xl mt-2">You've discovered Edoardo's journey!</p>
-              <p className="text-cyan-400 text-lg mt-4">🚀 Ready to collaborate and innovate together! 🚀</p>
-              <p className="text-pink-400 text-md mt-2">Let's build something amazing! 💪</p>
-            </div>
-          )}
         </div>
-      )}
+
+        <!-- LEVEL 1: STORY UNLOCK -->
+        <div id="level1-story" class="screen">
+            <h2>✨ STORY UNLOCKED ✨</h2>
+            <div class="dialogue-box">
+                <p>💭 While working at The Friends pub and studying mechanical engineering, Edoardo realised something important...</p>
+                <p>❌ He didn't enjoy mechanical engineering. At all.</p>
+                <p>🎭 So he changed direction completely and started studying DRAMA in Milan!</p>
+                <p>🎬 Stage over spreadsheets. Cue dramatic music...</p>
+            </div>
+            <button class="btn" onclick="showPhoto(1)">📸 VIEW PHOTO</button>
+            <button class="btn" onclick="unlockLevel(2)">CONTINUE →</button>
+        </div>
+
+        <!-- LEVEL 2: INTRO -->
+        <div id="level2-intro" class="screen">
+            <h2>LEVEL 2: THE LONDON LEAP</h2>
+            <div class="pixel-scene london">
+                <div class="building" style="left:30px; width:60px; height:100px; background:#8b0000;">
+                    <div style="background:#f9d923; width:20px; height:40px; position:absolute; bottom:0; left:20px;"></div>
+                </div>
+                <div class="building" style="left:110px; width:140px; height:80px; background:#696969;">
+                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:6px; color:#fff;">ALRA DRAMA SCHOOL</div>
+                </div>
+                <div class="building" style="right:30px; width:100px; height:120px; background:#2f4f4f;"></div>
+                <div style="position:absolute; bottom:30px; right:200px; width:60px; height:30px; background:#cc0000; border-radius:5px;">
+                    <div style="font-size:6px; color:#fff; text-align:center; padding-top:8px;">BUS</div>
+                </div>
+            </div>
+            <div class="dialogue-box">
+                <p>🇬🇧 In 2014, at 21, Edoardo moved to London!</p>
+                <p>🎭 He worked in hospitality and attended ALRA (Academy of Live and Recorded Arts).</p>
+                <p>💷 Great experience, but London life was expensive...</p>
+                <p>📖 At 25, he discovered self-improvement: books, digital marketing, and Shopify!</p>
+            </div>
+            <button class="btn" onclick="startMiniGame(2)">START MINI-GAME: BARTENDER HUSTLE</button>
+        </div>
+
+        <!-- LEVEL 2: MINI-GAME (BARTENDER) -->
+        <div id="level2-game" class="screen">
+            <div id="bartender-game">
+                <div class="game-header">
+                    <span>LEVEL 2: BARTENDER HUSTLE</span>
+                    <span class="timer" id="bartender-timer">⏱️ 45s</span>
+                    <span class="score-display" id="bartender-score">Drinks: 0/4</span>
+                </div>
+                <div class="game-area">
+                    <p>Make the drinks! Click ingredients in order, then SERVE.</p>
+                    <div class="drink-orders" id="drink-orders"></div>
+                    <div class="ingredients" id="ingredients"></div>
+                    <div class="mixing-area" id="mixing-area">Drop ingredients here</div>
+                    <button class="btn" onclick="serveDrink()">🍸 SERVE</button>
+                    <button class="btn" onclick="clearMix()" style="font-size:10px;">CLEAR</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEVEL 2: STORY UNLOCK -->
+        <div id="level2-story" class="screen">
+            <h2>✨ STORY UNLOCKED ✨</h2>
+            <div class="dialogue-box">
+                <p>📚 At 25, Edoardo felt a bit lost but decided to invest in himself.</p>
+                <p>💻 He started a Shopify store, learned dropshipping and digital marketing.</p>
+                <p>🦠 During COVID, he doubled down on studies to leave hospitality for good.</p>
+                <p>🎉 Mission accomplished: He landed a job at DIAGEO! (Thanks, Olga!)</p>
+            </div>
+            <button class="btn" onclick="showPhoto(2)">📸 VIEW PHOTO</button>
+            <button class="btn" onclick="unlockLevel(3)">CONTINUE →</button>
+        </div>
+
+        <!-- LEVEL 3: INTRO -->
+        <div id="level3-intro" class="screen">
+            <h2>LEVEL 3: LIFE TODAY & BEYOND</h2>
+            <div class="pixel-scene modern">
+                <div style="position:absolute; top:20px; left:30px; font-size:24px;">💻</div>
+                <div style="position:absolute; top:20px; right:30px; font-size:24px;">♟️</div>
+                <div style="position:absolute; bottom:50px; left:50%; transform:translateX(-50%); font-size:32px;">🌍</div>
+                <div style="position:absolute; top:60px; left:50%; transform:translateX(-50%); font-size:10px; color:#f9d923;">🇱🇹 LITHUANIA</div>
+            </div>
+            <div class="dialogue-box">
+                <p>❤️ Edoardo has a lovely girlfriend, Reda, from Lithuania!</p>
+                <p>🗺️ Fun fact: Lithuania is Europe's flattest country. Perfect for flat-earther jokes!</p>
+                <p>🤖 He's a geek who loves AI, reads about shipwrecks (The Wager), and plays chess.</p>
+                <p>🎭 Drama isn't dead - he's joining an improv course next month!</p>
+            </div>
+            <button class="btn" onclick="startMiniGame(3)">START MINI-GAME: QUIZ OF LIFE</button>
+        </div>
+
+        <!-- LEVEL 3: MINI-GAME (QUIZ) -->
+        <div id="level3-game" class="screen">
+            <div id="quiz-game">
+                <div class="game-header">
+                    <span>LEVEL 3: QUIZ OF LIFE</span>
+                    <span class="score-display" id="quiz-score">Score: 0/6</span>
+                </div>
+                <div class="game-area">
+                    <p class="quiz-question" id="quiz-question"></p>
+                    <div class="quiz-options" id="quiz-options"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEVEL 3: STORY UNLOCK / FINALE -->
+        <div id="level3-story" class="screen">
+            <h2>🎉 CONGRATULATIONS! 🎉</h2>
+            <div class="dialogue-box">
+                <p>🏆 You've unlocked Edoardo's full story!</p>
+                <p>🇮🇹 From Milan family chaos and The Friends pub...</p>
+                <p>🇬🇧 To drama school in London, self-improvement, and career transformation...</p>
+                <p>🚀 Today: A curious, geeky, travel-loving team member at Diageo!</p>
+                <p style="color:#f9d923;">🍕 Favourite foods: Pizza, Lasagna, Carbonara, Gelato 🍨</p>
+            </div>
+            <button class="btn" onclick="showPhoto(3)">📸 VIEW FINAL PHOTOS</button>
+            <button class="btn" onclick="showScreen('start-screen')">🔄 PLAY AGAIN</button>
+        </div>
+
+        <!-- PHOTO MODAL -->
+        <div id="photo-modal" class="photo-modal">
+            <div class="photo-placeholder">
+                <p class="photo-text" id="photo-label">📷 PHOTO PLACEHOLDER</p>
+                <p class="photo-text" style="font-size:8px; margin-top:10px;" id="photo-hint">Replace with your image!</p>
+                <!-- TO ADD YOUR PHOTO: Replace the src below with your image URL or local path -->
+                <!-- <img src="your-photo.jpg" alt="Photo"> -->
+            </div>
+            <button class="btn" onclick="closePhoto()">CLOSE</button>
+        </div>
     </div>
-  );
-};
 
-export default EdoardoGame;
+    <script>
+        // ========== GAME STATE ==========
+        let gameState = {
+            currentLevel: 1,
+            levelsUnlocked: [true, false, false],
+            levelsComplete: [false, false, false]
+        };
+
+        // ========== SCREEN MANAGEMENT ==========
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startGame() {
+            showScreen('level-select');
+            updateLevelButtons();
+        }
+
+        function updateLevelButtons() {
+            document.getElementById('level1-btn').disabled = !gameState.levelsUnlocked[0];
+            document.getElementById('level2-btn').disabled = !gameState.levelsUnlocked[1];
+            document.getElementById('level3-btn').disabled = !gameState.levelsUnlocked[2];
+        }
+
+        function startLevel(level) {
+            gameState.currentLevel = level;
+            showScreen(`level${level}-intro`);
+        }
+
+        function unlockLevel(level) {
+            if (level <= 3) {
+                gameState.levelsUnlocked[level - 1] = true;
+                gameState.levelsComplete[gameState.currentLevel - 1] = true;
+                if (level <= 3) {
+                    showScreen(`level${level}-intro`);
+                }
+            }
+            updateLevelButtons();
+        }
+
+        // ========== MINI-GAME LAUNCHER ==========
+        function startMiniGame(level) {
+            showScreen(`level${level}-game`);
+            if (level === 1) initPizzaGame();
+            if (level === 2) initBartenderGame();
+            if (level === 3) initQuizGame();
+        }
+
+        // ========== LEVEL 1: PIZZA GAME ==========
+        const pizzaTypes = ['🍕', '🍕', '🍕'];
+        const pizzaNames = ['Margherita', 'Pepperoni', 'Veggie'];
+        const pizzaEmoji = ['🧀', '🥓', '🥦'];
+        let pizzaScore = 0;
+        let pizzaTimer = 30;
+        let pizzaInterval;
+        let selectedPizza = null;
+        let cousinsData = [];
+
+        function initPizzaGame() {
+            pizzaScore = 0;
+            pizzaTimer = 30;
+            selectedPizza = null;
+            document.getElementById('pizza-score').textContent = `Score: 0/5`;
+            document.getElementById('pizza-timer').textContent = `⏱️ ${pizzaTimer}s`;
+            document.getElementById('pizza-timer').classList.remove('warning');
+
+            // Generate cousins
+            const container = document.getElementById('cousins-container');
+            container.innerHTML = '';
+            cousinsData = [];
+            const faces = ['👦', '👧', '👴', '👵', '👨'];
+            for (let i = 0; i < 5; i++) {
+                const wantIndex = Math.floor(Math.random() * 3);
+                cousinsData.push({ want: wantIndex, served: false });
+                container.innerHTML += `
+                    <div class="cousin" id="cousin-${i}" onclick="servePizzaToCousin(${i})">
+                        <span class="cousin-face">${faces[i]}</span>
+                        <span class="cousin-want">${pizzaEmoji[wantIndex]}</span>
+                    </div>
+                `;
+            }
+
+            // Generate pizza belt
+            const belt = document.getElementById('pizza-belt');
+            belt.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                belt.innerHTML += `
+                    <div class="pizza-item" id="pizza-${i}" onclick="selectPizza(${i})">
+                        ${pizzaTypes[i]}${pizzaEmoji[i]}
+                    </div>
+                `;
+            }
+
+            // Start timer
+            clearInterval(pizzaInterval);
+            pizzaInterval = setInterval(() => {
+                pizzaTimer--;
+                document.getElementById('pizza-timer').textContent = `⏱️ ${pizzaTimer}s`;
+                if (pizzaTimer <= 10) {
+                    document.getElementById('pizza-timer').classList.add('warning');
+                }
+                if (pizzaTimer <= 0) {
+                    clearInterval(pizzaInterval);
+                    alert('Time's up! The family staged a pasta mutiny. Try again!');
+                    initPizzaGame();
+                }
+            }, 1000);
+        }
+
+        function selectPizza(index) {
+            document.querySelectorAll('.pizza-item').forEach(p => p.classList.remove('selected'));
+            document.getElementById(`pizza-${index}`).classList.add('selected');
+            selectedPizza = index;
+        }
+
+        function servePizzaToCousin(cousinIndex) {
+            if (selectedPizza === null) return;
+            if (cousinsData[cousinIndex].served) return;
+
+            const cousinEl = document.getElementById(`cousin-${cousinIndex}`);
+            if (cousinsData[cousinIndex].want === selectedPizza) {
+                cousinEl.classList.add('correct');
+                cousinsData[cousinIndex].served = true;
+                pizzaScore++;
+                document.getElementById('pizza-score').textContent = `Score: ${pizzaScore}/5`;
+                if (pizzaScore >= 5) {
+                    clearInterval(pizzaInterval);
+                    setTimeout(() => {
+                        alert('🎉 Perfect! All cousins are happy!');
+                        showScreen('level1-story');
+                    }, 500);
+                }
+            } else {
+                cousinEl.classList.add('wrong');
+                setTimeout(() => cousinEl.classList.remove('wrong'), 500);
+            }
+            selectedPizza = null;
+            document.querySelectorAll('.pizza-item').forEach(p => p.classList.remove('selected'));
+        }
+
+        // ========== LEVEL 2: BARTENDER GAME ==========
+        const drinks = [
+            { name: 'Beer', recipe: ['🍺'], emoji: '🍺' },
+            { name: 'G&T', recipe: ['🧊', '🍸'], emoji: '🍸' },
+            { name: 'Cocktail', recipe: ['🧊', '🍹', '🍋'], emoji: '🍹' },
+            { name: 'Coffee', recipe: ['☕'], emoji: '☕' }
+        ];
+        const allIngredients = ['🍺', '🧊', '🍸', '🍹', '🍋', '☕'];
+        let bartenderScore = 0;
+        let bartenderTimer = 45;
+        let bartenderInterval;
+        let currentMix = [];
+        let currentOrders = [];
+
+        function initBartenderGame() {
+            bartenderScore = 0;
+            bartenderTimer = 45;
+            currentMix = [];
+            document.getElementById('bartender-score').textContent = `Drinks: 0/4`;
+            document.getElementById('bartender-timer').textContent = `⏱️ ${bartenderTimer}s`;
+            document.getElementById('bartender-timer').classList.remove('warning');
+            document.getElementById('mixing-area').innerHTML = 'Drop ingredients here';
+
+            // Generate orders
+            currentOrders = [...drinks].sort(() => Math.random() - 0.5);
+            const ordersEl = document.getElementById('drink-orders');
+            ordersEl.innerHTML = '';
+            currentOrders.forEach((d, i) => {
+                ordersEl.innerHTML += `<div class="order" id="order-${i}">${d.emoji} ${d.name}</div>`;
+            });
+
+            // Generate ingredients
+            const ingredientsEl = document.getElementById('ingredients');
+            ingredientsEl.innerHTML = '';
+            allIngredients.forEach((ing, i) => {
+                ingredientsEl.innerHTML += `<div class="ingredient" onclick="addIngredient('${ing}')">${ing}</div>`;
+            });
+
+            // Start timer
+            clearInterval(bartenderInterval);
+            bartenderInterval = setInterval(() => {
+                bartenderTimer--;
+                document.getElementById('bartender-timer').textContent = `⏱️ ${bartenderTimer}s`;
+                if (bartenderTimer <= 10) {
+                    document.getElementById('bartender-timer').classList.add('warning');
+                }
+                if (bartenderTimer <= 0) {
+                    clearInterval(bartenderInterval);
+                    alert('Time's up! The manager gives you a pep talk. Try again!');
+                    initBartenderGame();
+                }
+            }, 1000);
+        }
+
+        function addIngredient(ing) {
+            if (currentMix.length < 4) {
+                currentMix.push(ing);
+                document.getElementById('mixing-area').innerHTML = currentMix.join(' ');
+            }
+        }
+
+        function clearMix() {
+            currentMix = [];
+            document.getElementById('mixing-area').innerHTML = 'Drop ingredients here';
+        }
+
+        function serveDrink() {
+            if (currentMix.length === 0) return;
+
+            // Check if mix matches any remaining order
+            for (let i = 0; i < currentOrders.length; i++) {
+                const order = currentOrders[i];
+                if (!order.done && JSON.stringify(currentMix) === JSON.stringify(order.recipe)) {
+                    order.done = true;
+                    document.getElementById(`order-${i}`).classList.add('completed');
+                    bartenderScore++;
+                    document.getElementById('bartender-score').textContent = `Drinks: ${bartenderScore}/4`;
+                    clearMix();
+                    if (bartenderScore >= 4) {
+                        clearInterval(bartenderInterval);
+                        setTimeout(() => {
+                            alert('🎉 All drinks served! You're a pro!');
+                            showScreen('level2-story');
+                        }, 500);
+                    }
+                    return;
+                }
+            }
+            alert('❌ That doesn't match any order! Try again.');
+            clearMix();
+        }
+
+        // ========== LEVEL 3: QUIZ GAME ==========
+        const quizQuestions = [
+            {
+                q: "Where is Edoardo originally from?",
+                options: ["Milan, Italy", "Rome, Italy", "Madrid, Spain"],
+                correct: 0
+            },
+            {
+                q: "What did Edoardo first study at university?",
+                options: ["Economics", "Mechanical Engineering", "Computer Science"],
+                correct: 1
+            },
+            {
+                q: "What is the name of his family pub in Milan?",
+                options: ["The Mates", "The Friends", "The Buddies"],
+                correct: 1
+            },
+            {
+                q: "What drama school did he attend in London?",
+                options: ["RADA", "ALRA", "LAMDA"],
+                correct: 1
+            },
+            {
+                q: "What is Edoardo's chess ELO goal?",
+                options: ["500", "1000", "2000"],
+                correct: 1
+            },
+            {
+                q: "What country is his girlfriend Reda from?",
+                options: ["Latvia", "Lithuania", "Estonia"],
+                correct: 1
+            }
+        ];
+        let quizIndex = 0;
+        let quizScore = 0;
+
+        function initQuizGame() {
+            quizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-score').textContent = `Score: 0/6`;
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (quizIndex >= quizQuestions.length) {
+                if (quizScore >= 4) {
+                    setTimeout(() => {
+                        alert(`🎉 Amazing! You scored ${quizScore}/6! You really know Edoardo!`);
+                        showScreen('level3-story');
+                    }, 300);
+                } else {
+                    alert(`You scored ${quizScore}/6. Let's try again!`);
+                    initQuizGame();
+                }
+                return;
+            }
+
+            const q = quizQuestions[quizIndex];
+            document.getElementById('quiz-question').textContent = `Q${quizIndex + 1}: ${q.q}`;
+            const optionsEl = document.getElementById('quiz-options');
+            optionsEl.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                optionsEl.innerHTML += `<div class="quiz-option" id="opt-${i}" onclick="answerQuiz(${i})">${opt}</div>`;
+            });
+        }
+
+        function answerQuiz(index) {
+            const q = quizQuestions[quizIndex];
+            const optEl = document.getElementById(`opt-${index}`);
+            if (index === q.correct) {
+                optEl.classList.add('correct');
+                quizScore++;
+            } else {
+                optEl.classList.add('wrong');
+                document.getElementById(`opt-${q.correct}`).classList.add('correct');
+            }
+            document.getElementById('quiz-score').textContent = `Score: ${quizScore}/6`;
+
+            // Disable all options
+            document.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'none');
+
+            setTimeout(() => {
+                quizIndex++;
+                showQuizQuestion();
+            }, 1000);
+        }
+
+        // ========== PHOTO MODAL ==========
+        const photoLabels = [
+            "📷 Edoardo's Family in Milan",
+            "📷 Edoardo in London / Drama School",
+            "📷 Edoardo & Reda / Travel Adventures"
+        ];
+
+        function showPhoto(level) {
+            document.getElementById('photo-label').textContent = photoLabels[level - 1];
+            document.getElementById('photo-hint').textContent = "Replace this placeholder with your actual photo!";
+            document.getElementById('photo-modal').classList.add('active');
+        }
+
+        function closePhoto() {
+            document.getElementById('photo-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
