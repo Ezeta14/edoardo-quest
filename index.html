@@ -28,54 +28,27 @@
             border: 4px solid #16213e;
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
         }
-        
-        .blink {
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
-        }
-        
-        .pixel-text {
-            font-size: 12px;
-            line-height: 1.6;
-        }
-        
-        button {
-            font-family: 'Press Start 2P', cursive;
-            background: #0f3460;
-            color: #00d4ff;
-            border: 3px solid #00d4ff;
-            padding: 10px 20px;
-            font-size: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background: #00d4ff;
-            color: #0f3460;
-            transform: scale(1.05);
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     
     <script>
+        // =====================
+        // PHOTO CONFIGURATION - ADD YOUR IMAGES HERE
+        // =====================
+        const PHOTOS = {
+            family_milan_1: "https://ibb.co/V0Vdz632",      // Level 1 photo
+            london_life_1: "YOUR_LONDON_PHOTO_URL_HERE",       // Level 2 photo
+            reda_travel_1: "YOUR_TRAVEL_PHOTO_URL_HERE"        // Level 3 photo
+        };
+        
         // GAME DATA STRUCTURE
         const GAME_DATA = {
             title: "Edoardo's Quest: From Milan to Marketing",
             currentLevel: 0,
             currentScene: 'start',
-            levelProgress: [false, false, false], // Level completion status
+            levelProgress: [false, false, false],
             
             levels: {
                 1: {
@@ -101,14 +74,13 @@
                             objective: "Serve the correct pizza to the correct cousin before time runs out!",
                             timeLimit: 45,
                             targetScore: 8,
-                            pizzaTypes: ["🍕Margherita", "🍕Pepperoni", "🍕Veggie"],
+                            pizzaTypes: ["Margherita", "Pepperoni", "Veggie"],
                             failMessage: "The family has staged a pasta mutiny. Try again?"
                         },
                         photo: {
                             type: "photo_spot",
                             id: "family_milan_1",
-                            caption: "Edoardo's family in Milan",
-                            placeholder: "📸 [Family Photo Placeholder]"
+                            caption: "Edoardo's family in Milan"
                         },
                         outro: {
                             type: "dialogue",
@@ -143,14 +115,13 @@
                             objective: "Mix and serve drinks in the correct order!",
                             timeLimit: 50,
                             targetScore: 10,
-                            drinks: ["🍺Beer", "🍸G&T", "🍹Mocktail", "🥃Whisky"],
+                            drinks: ["Beer", "G&T", "Mocktail", "Whisky"],
                             failMessage: "Your cocktails confused everyone. The manager gives you a motivational talk. Try again?"
                         },
                         photo: {
                             type: "photo_spot",
                             id: "london_life_1",
-                            caption: "Edoardo in London / Drama school",
-                            placeholder: "📸 [London Life Photo Placeholder]"
+                            caption: "Edoardo in London / Drama school"
                         },
                         outro: {
                             type: "dialogue",
@@ -193,44 +164,19 @@
                             title: "Quiz of Life - Meet Edoardo",
                             objective: "Answer questions about Edoardo to fill the Friendship Meter!",
                             questions: [
-                                {
-                                    q: "Where is Edoardo originally from?",
-                                    options: ["A: Milan, Italy", "B: Rome, Italy", "C: Madrid, Spain"],
-                                    correct: 0
-                                },
-                                {
-                                    q: "What did he first study?",
-                                    options: ["A: Mechanical engineering", "B: Economics", "C: Computer science"],
-                                    correct: 0
-                                },
-                                {
-                                    q: "What school did he attend in London?",
-                                    options: ["A: Cooking school", "B: Drama school (ALRA)", "C: Coding bootcamp"],
-                                    correct: 1
-                                },
-                                {
-                                    q: "What is his chess goal?",
-                                    options: ["A: 500 Elo", "B: 1000 Elo", "C: World champion tomorrow"],
-                                    correct: 1
-                                },
-                                {
-                                    q: "What are some favourite dishes?",
-                                    options: ["A: Pizza, lasagna, carbonara", "B: Only sushi", "C: Only salad"],
-                                    correct: 0
-                                },
-                                {
-                                    q: "What project did he start?",
-                                    options: ["A: Shopify/digital marketing", "B: Carpentry", "C: Gardening blog"],
-                                    correct: 0
-                                }
+                                { q: "Where is Edoardo originally from?", options: ["Milan, Italy", "Rome, Italy", "Madrid, Spain"], correct: 0 },
+                                { q: "What did he first study?", options: ["Mechanical engineering", "Economics", "Computer science"], correct: 0 },
+                                { q: "What school did he attend in London?", options: ["Cooking school", "Drama school (ALRA)", "Coding bootcamp"], correct: 1 },
+                                { q: "What is his chess goal?", options: ["500 Elo", "1000 Elo", "World champion tomorrow"], correct: 1 },
+                                { q: "What are some favourite dishes?", options: ["Pizza, lasagna, carbonara", "Only sushi", "Only salad"], correct: 0 },
+                                { q: "What project did he start?", options: ["Shopify/digital marketing", "Carpentry", "Gardening blog"], correct: 0 }
                             ],
                             failMessage: "Not quite! Let's try again to get to know Edoardo better."
                         },
                         photo: {
                             type: "photo_spot",
                             id: "reda_travel_1",
-                            caption: "Edoardo & Reda / Travel / Food",
-                            placeholder: "📸 [Travel & Food Photo Placeholder]"
+                            caption: "Edoardo & Reda / Travel / Food"
                         },
                         outro: {
                             type: "dialogue",
@@ -255,22 +201,16 @@
         let gameState = {
             screen: 'start',
             currentLevel: 0,
+            currentScene: 'intro',
             currentDialogue: 0,
             levelUnlocked: [true, false, false],
             minigameState: null,
-            score: 0,
-            time: 0,
             blinkState: true
         };
         
-        // Timing
         let lastTime = Date.now();
         let blinkTimer = 0;
-        
-        // Input handling
-        let mouseX = 0;
-        let mouseY = 0;
-        let mouseClicked = false;
+        let mouseX = 0, mouseY = 0, mouseClicked = false;
         
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
@@ -278,83 +218,39 @@
             mouseY = e.clientY - rect.top;
         });
         
-        canvas.addEventListener('click', () => {
-            mouseClicked = true;
-        });
+        canvas.addEventListener('click', () => { mouseClicked = true; });
         
-        // RENDERING FUNCTIONS
+        // DRAWING HELPERS
         function drawPixelBackground(theme) {
-            // Base gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            
             if (theme === 'milan') {
                 gradient.addColorStop(0, '#ff6b6b');
                 gradient.addColorStop(1, '#8b0000');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Simple building shapes
-                ctx.fillStyle = '#4a0000';
-                for (let i = 0; i < 5; i++) {
-                    ctx.fillRect(i * 180, 400, 140, 200);
-                    ctx.fillStyle = '#fff3';
-                    for (let w = 0; w < 6; w++) {
-                        ctx.fillRect(i * 180 + 20 + w * 20, 420 + Math.random() * 100, 15, 15);
-                    }
-                    ctx.fillStyle = '#4a0000';
-                }
             } else if (theme === 'london') {
                 gradient.addColorStop(0, '#555');
                 gradient.addColorStop(1, '#1a472a');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // London buildings
-                ctx.fillStyle = '#2a2a2a';
-                for (let i = 0; i < 6; i++) {
-                    ctx.fillRect(i * 150, 350, 120, 250);
-                    ctx.fillStyle = '#ff03';
-                    for (let w = 0; w < 5; w++) {
-                        ctx.fillRect(i * 150 + 15 + w * 20, 370 + Math.random() * 150, 12, 12);
-                    }
-                    ctx.fillStyle = '#2a2a2a';
-                }
             } else if (theme === 'apartment' || theme === 'desk') {
                 gradient.addColorStop(0, '#2a2a5a');
                 gradient.addColorStop(1, '#1a1a4a');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Modern interior
-                ctx.fillStyle = '#3a3a6a';
-                ctx.fillRect(50, 300, 700, 250);
-                ctx.fillStyle = '#4a4a8a';
-                ctx.fillRect(150, 350, 80, 120);
-                ctx.fillRect(450, 350, 80, 120);
             } else {
                 gradient.addColorStop(0, '#1a1a2e');
                 gradient.addColorStop(1, '#0f0f1e');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         
-        function drawText(text, x, y, size = 12, color = '#fff', align = 'left') {
+        function drawText(text, x, y, size = 12, color = '#fff') {
             ctx.font = `${size}px 'Press Start 2P'`;
             ctx.fillStyle = color;
-            ctx.textAlign = align;
-            
-            // Word wrap
+            ctx.textAlign = 'left';
             const maxWidth = canvas.width - 100;
             const words = text.split(' ');
             let line = '';
             let yOffset = 0;
-            
             for (let word of words) {
                 const testLine = line + word + ' ';
-                const metrics = ctx.measureText(testLine);
-                
-                if (metrics.width > maxWidth && line !== '') {
+                if (ctx.measureText(testLine).width > maxWidth && line !== '') {
                     ctx.fillText(line, x, y + yOffset);
                     line = word + ' ';
                     yOffset += size + 8;
@@ -368,38 +264,29 @@
         
         function drawButton(text, x, y, width, height) {
             const hover = mouseX > x && mouseX < x + width && mouseY > y && mouseY < y + height;
-            
             ctx.fillStyle = hover ? '#00d4ff' : '#0f3460';
             ctx.fillRect(x, y, width, height);
             ctx.strokeStyle = '#00d4ff';
             ctx.lineWidth = 3;
             ctx.strokeRect(x, y, width, height);
-            
             ctx.fillStyle = hover ? '#0f3460' : '#00d4ff';
             ctx.font = '10px "Press Start 2P"';
             ctx.textAlign = 'center';
             ctx.fillText(text, x + width / 2, y + height / 2 + 4);
-            
-            if (hover && mouseClicked) {
-                return true;
-            }
-            return false;
+            return hover && mouseClicked;
         }
         
         // SCREEN RENDERERS
         function renderStartScreen() {
             drawPixelBackground('start');
-            
-            // Title
             ctx.fillStyle = '#00d4ff';
             ctx.font = '24px "Press Start 2P"';
             ctx.textAlign = 'center';
             ctx.fillText("EDOARDO'S QUEST", canvas.width / 2, 150);
-            
             ctx.font = '12px "Press Start 2P"';
             ctx.fillText("From Milan to Marketing", canvas.width / 2, 190);
             
-            // Pixel Edoardo
+            // Pixel character
             ctx.fillStyle = '#ffcc99';
             ctx.fillRect(375, 250, 50, 70);
             ctx.fillStyle = '#000';
@@ -407,7 +294,6 @@
             ctx.fillRect(405, 265, 10, 10);
             ctx.fillRect(390, 285, 20, 5);
             
-            // Blinking text
             if (gameState.blinkState) {
                 ctx.fillStyle = '#fff';
                 ctx.font = '16px "Press Start 2P"';
@@ -421,38 +307,31 @@
         
         function renderLevelSelect() {
             drawPixelBackground('menu');
-            
             ctx.fillStyle = '#00d4ff';
             ctx.font = '20px "Press Start 2P"';
             ctx.textAlign = 'center';
             ctx.fillText("SELECT LEVEL", canvas.width / 2, 80);
             
-            // Level buttons
             for (let i = 1; i <= 3; i++) {
                 const level = GAME_DATA.levels[i];
-                const y = 120 + (i - 1) * 120;
+                const y = 120 + (i - 1) * 140;
                 const unlocked = gameState.levelUnlocked[i - 1];
                 
                 ctx.fillStyle = unlocked ? '#0f3460' : '#333';
-                ctx.fillRect(150, y, 500, 90);
+                ctx.fillRect(150, y, 500, 100);
                 ctx.strokeStyle = unlocked ? '#00d4ff' : '#666';
                 ctx.lineWidth = 3;
-                ctx.strokeRect(150, y, 500, 90);
+                ctx.strokeRect(150, y, 500, 100);
                 
                 if (unlocked) {
                     ctx.fillStyle = '#00d4ff';
                     ctx.font = '14px "Press Start 2P"';
                     ctx.textAlign = 'left';
-                    ctx.fillText(`LEVEL ${i}:`, 170, y + 35);
+                    ctx.fillText(`LEVEL ${i}:`, 170, y + 40);
                     ctx.font = '10px "Press Start 2P"';
-                    ctx.fillText(level.title, 170, y + 60);
+                    ctx.fillText(level.title, 170, y + 70);
                     
-                    if (gameState.levelUnlocked[i]) {
-                        ctx.fillStyle = '#0f0';
-                        ctx.fillText("✓ COMPLETE", 520, y + 60);
-                    }
-                    
-                    const hover = mouseX > 150 && mouseX < 650 && mouseY > y && mouseY < y + 90;
+                    const hover = mouseX > 150 && mouseX < 650 && mouseY > y && mouseY < y + 100;
                     if (hover && mouseClicked) {
                         startLevel(i);
                     }
@@ -460,73 +339,138 @@
                     ctx.fillStyle = '#666';
                     ctx.font = '14px "Press Start 2P"';
                     ctx.textAlign = 'center';
-                    ctx.fillText("🔒 LOCKED", 400, y + 50);
+                    ctx.fillText("LOCKED", 400, y + 55);
                 }
+            }
+        }
+        
+        function startLevel(levelNum) {
+            gameState.currentLevel = levelNum;
+            gameState.currentScene = 'intro';
+            gameState.currentDialogue = 0;
+            gameState.minigameState = null;
+            gameState.screen = 'dialogue';
+        }
+        
+        function advanceScene() {
+            const sceneOrder = ['intro', 'minigame', 'photo', 'outro'];
+            const currentIndex = sceneOrder.indexOf(gameState.currentScene);
+            
+            if (currentIndex < sceneOrder.length - 1) {
+                gameState.currentScene = sceneOrder[currentIndex + 1];
+                gameState.currentDialogue = 0;
+                gameState.minigameState = null;
+                
+                const sceneType = GAME_DATA.levels[gameState.currentLevel].scenes[gameState.currentScene].type;
+                if (sceneType === 'dialogue' || sceneType === 'photo_spot') {
+                    gameState.screen = sceneType === 'photo_spot' ? 'photo' : 'dialogue';
+                } else {
+                    gameState.screen = 'minigame';
+                }
+            } else {
+                // Level complete
+                if (gameState.currentLevel < 3) {
+                    gameState.levelUnlocked[gameState.currentLevel] = true;
+                }
+                gameState.screen = 'levelSelect';
             }
         }
         
         function renderDialogue() {
             const level = GAME_DATA.levels[gameState.currentLevel];
-            const scene = gameState.currentScene;
-            const sceneData = level.scenes[scene];
+            const sceneData = level.scenes[gameState.currentScene];
             
             drawPixelBackground(sceneData.background);
             
-            // Dialogue box
-            ctx.fillStyle = '#000a';
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
             ctx.fillRect(50, 400, 700, 150);
             ctx.strokeStyle = '#00d4ff';
             ctx.lineWidth = 3;
             ctx.strokeRect(50, 400, 700, 150);
             
-            // Text
             const dialogue = sceneData.dialogues[gameState.currentDialogue];
-            ctx.fillStyle = '#fff';
-            ctx.font = '11px "Press Start 2P"';
-            ctx.textAlign = 'left';
             drawText(dialogue, 70, 430, 11);
             
-            // Continue prompt
             ctx.fillStyle = '#0f0';
             ctx.font = '10px "Press Start 2P"';
             ctx.textAlign = 'right';
             ctx.fillText(`[${gameState.currentDialogue + 1}/${sceneData.dialogues.length}]`, 720, 530);
             
-            if (drawButton("NEXT", 600, 500, 120, 35)) {
+            if (drawButton("NEXT", 600, 510, 120, 35)) {
                 gameState.currentDialogue++;
-                
                 if (gameState.currentDialogue >= sceneData.dialogues.length) {
                     advanceScene();
                 }
             }
         }
         
-        function renderPizzaDash() {
-            drawPixelBackground('milan');
+        function renderPhoto() {
+            const level = GAME_DATA.levels[gameState.currentLevel];
+            const sceneData = level.scenes.photo;
             
-            const minigame = GAME_DATA.levels[1].scenes.minigame;
+            drawPixelBackground('apartment');
+            
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = '16px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText("PHOTO UNLOCKED!", canvas.width / 2, 80);
+            
+            // Photo frame
+            ctx.fillStyle = '#333';
+            ctx.fillRect(200, 120, 400, 300);
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(200, 120, 400, 300);
+            
+            const photoUrl = PHOTOS[sceneData.id];
+            if (photoUrl && photoUrl !== "YOUR_FAMILY_PHOTO_URL_HERE" && 
+                photoUrl !== "YOUR_LONDON_PHOTO_URL_HERE" && 
+                photoUrl !== "YOUR_TRAVEL_PHOTO_URL_HERE") {
+                const img = new Image();
+                img.src = photoUrl;
+                img.onload = () => ctx.drawImage(img, 210, 130, 380, 280);
+            } else {
+                ctx.fillStyle = '#666';
+                ctx.font = '12px "Press Start 2P"';
+                ctx.fillText("[Photo Placeholder]", canvas.width / 2, 280);
+            }
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px "Press Start 2P"';
+            ctx.fillText(sceneData.caption, canvas.width / 2, 450);
+            
+            if (drawButton("CONTINUE", 300, 500, 200, 50)) {
+                advanceScene();
+            }
+        }
+        
+        function renderMinigame() {
+            const level = GAME_DATA.levels[gameState.currentLevel];
+            const minigame = level.scenes.minigame;
+            
+            if (minigame.type === 'pizza_dash') {
+                renderPizzaDash(minigame);
+            } else if (minigame.type === 'bartender') {
+                renderBartender(minigame);
+            } else if (minigame.type === 'quiz') {
+                renderQuiz(minigame);
+            }
+        }
+        
+        function renderPizzaDash(minigame) {
+            drawPixelBackground('milan');
             
             if (!gameState.minigameState) {
                 gameState.minigameState = {
                     time: minigame.timeLimit,
                     score: 0,
-                    currentOrder: null,
-                    pizzas: minigame.pizzaTypes,
-                    generateNewOrder: function() {
-                        this.currentOrder = {
-                            type: this.pizzas[Math.floor(Math.random() * this.pizzas.length)],
-                            x: 100 + Math.random() * 200,
-                            y: 150
-                        };
-                    }
+                    currentOrder: minigame.pizzaTypes[Math.floor(Math.random() * minigame.pizzaTypes.length)]
                 };
-                gameState.minigameState.generateNewOrder();
             }
             
             const state = gameState.minigameState;
             
-            // UI
-            ctx.fillStyle = '#000a';
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.fillRect(0, 0, canvas.width, 100);
             ctx.fillStyle = '#fff';
             ctx.font = '14px "Press Start 2P"';
@@ -534,37 +478,21 @@
             ctx.fillText(`TIME: ${Math.ceil(state.time)}s`, 50, 40);
             ctx.fillText(`SCORE: ${state.score}/${minigame.targetScore}`, 50, 70);
             
-            // Cousin wants pizza
-            if (state.currentOrder) {
-                ctx.fillStyle = '#ffcc99';
-                ctx.fillRect(state.currentOrder.x, state.currentOrder.y, 60, 80);
-                ctx.fillStyle = '#000';
-                ctx.fillRect(state.currentOrder.x + 15, state.currentOrder.y + 20, 10, 10);
-                ctx.fillRect(state.currentOrder.x + 35, state.currentOrder.y + 20, 10, 10);
-                
-                // Speech bubble
-                ctx.fillStyle = '#fffa';
-                ctx.fillRect(state.currentOrder.x + 70, state.currentOrder.y + 10, 120, 40);
-                ctx.fillStyle = '#000';
-                ctx.font = '10px "Press Start 2P"';
-                ctx.textAlign = 'left';
-                ctx.fillText(state.currentOrder.type, state.currentOrder.x + 75, state.currentOrder.y + 35);
-            }
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText("COUSIN WANTS:", canvas.width / 2, 180);
+            ctx.fillText(state.currentOrder, canvas.width / 2, 220);
             
-            // Pizza options
-            for (let i = 0; i < state.pizzas.length; i++) {
-                const x = 200 + i * 180;
-                const y = 400;
-                
-                if (drawButton(state.pizzas[i], x, y, 150, 60)) {
-                    if (state.currentOrder && state.pizzas[i] === state.currentOrder.type) {
+            for (let i = 0; i < minigame.pizzaTypes.length; i++) {
+                const x = 150 + i * 180;
+                if (drawButton(minigame.pizzaTypes[i], x, 350, 150, 60)) {
+                    if (minigame.pizzaTypes[i] === state.currentOrder) {
                         state.score++;
-                        state.generateNewOrder();
-                        
                         if (state.score >= minigame.targetScore) {
-                            gameState.minigameState = null;
-                            gameState.currentScene = 'photo';
-                            gameState.currentDialogue = 0;
+                            advanceScene();
+                        } else {
+                            state.currentOrder = minigame.pizzaTypes[Math.floor(Math.random() * minigame.pizzaTypes.length)];
                         }
                     } else {
                         state.time -= 5;
@@ -572,48 +500,27 @@
                 }
             }
             
-            // Update time
             state.time -= (Date.now() - lastTime) / 1000;
             
             if (state.time <= 0) {
-                ctx.fillStyle = '#000e';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#f00';
-                ctx.font = '16px "Press Start 2P"';
-                ctx.textAlign = 'center';
-                ctx.fillText("TIME'S UP!", canvas.width / 2, 250);
-                ctx.fillStyle = '#fff';
-                ctx.font = '11px "Press Start 2P"';
-                drawText(minigame.failMessage, canvas.width / 2, 300, 11, '#fff', 'center');
-                
-                if (drawButton("TRY AGAIN", 300, 400, 200, 50)) {
-                    gameState.minigameState = null;
-                }
+                renderFailScreen(minigame.failMessage);
             }
         }
         
-        function renderBartender() {
+        function renderBartender(minigame) {
             drawPixelBackground('london');
-            
-            const minigame = GAME_DATA.levels[2].scenes.minigame;
             
             if (!gameState.minigameState) {
                 gameState.minigameState = {
                     time: minigame.timeLimit,
                     score: 0,
-                    currentOrder: null,
-                    drinks: minigame.drinks,
-                    generateNewOrder: function() {
-                        this.currentOrder = this.drinks[Math.floor(Math.random() * this.drinks.length)];
-                    }
+                    currentOrder: minigame.drinks[Math.floor(Math.random() * minigame.drinks.length)]
                 };
-                gameState.minigameState.generateNewOrder();
             }
             
             const state = gameState.minigameState;
             
-            // UI
-            ctx.fillStyle = '#000a';
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.fillRect(0, 0, canvas.width, 100);
             ctx.fillStyle = '#fff';
             ctx.font = '14px "Press Start 2P"';
@@ -621,29 +528,21 @@
             ctx.fillText(`TIME: ${Math.ceil(state.time)}s`, 50, 40);
             ctx.fillText(`SCORE: ${state.score}/${minigame.targetScore}`, 50, 70);
             
-            // Current order
-            if (state.currentOrder) {
-                ctx.fillStyle = '#fff';
-                ctx.font = '16px "Press Start 2P"';
-                ctx.textAlign = 'center';
-                ctx.fillText("ORDER:", canvas.width / 2, 150);
-                ctx.fillText(state.currentOrder, canvas.width / 2, 190);
-            }
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText("ORDER:", canvas.width / 2, 180);
+            ctx.fillText(state.currentOrder, canvas.width / 2, 220);
             
-            // Drink buttons
-            for (let i = 0; i < state.drinks.length; i++) {
-                const x = 100 + i * 160;
-                const y = 350;
-                
-                if (drawButton(state.drinks[i], x, y, 140, 60)) {
-                    if (state.currentOrder && state.drinks[i] === state.currentOrder) {
+            for (let i = 0; i < minigame.drinks.length; i++) {
+                const x = 80 + i * 170;
+                if (drawButton(minigame.drinks[i], x, 350, 150, 60)) {
+                    if (minigame.drinks[i] === state.currentOrder) {
                         state.score++;
-                        state.generateNewOrder();
-                        
                         if (state.score >= minigame.targetScore) {
-                            gameState.minigameState = null;
-                            gameState.currentScene = 'photo';
-                            gameState.currentDialogue = 0;
+                            advanceScene();
+                        } else {
+                            state.currentOrder = minigame.drinks[Math.floor(Math.random() * minigame.drinks.length)];
                         }
                     } else {
                         state.time -= 3;
@@ -654,41 +553,87 @@
             state.time -= (Date.now() - lastTime) / 1000;
             
             if (state.time <= 0) {
-                ctx.fillStyle = '#000e';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#f00';
-                ctx.font = '16px "Press Start 2P"';
-                ctx.textAlign = 'center';
-                ctx.fillText("TIME'S UP!", canvas.width / 2, 250);
-                ctx.fillStyle = '#fff';
-                ctx.font = '11px "Press Start 2P"';
-                drawText(minigame.failMessage, canvas.width / 2, 300, 11, '#fff', 'center');
-                
-                if (drawButton("TRY AGAIN", 300, 400, 200, 50)) {
-                    gameState.minigameState = null;
-                }
+                renderFailScreen(minigame.failMessage);
             }
         }
         
-        function renderQuiz() {
+        function renderQuiz(minigame) {
             drawPixelBackground('apartment');
             
-            const minigame = GAME_DATA.levels[3].scenes.minigame;
-            
             if (!gameState.minigameState) {
-                gameState.minigameState = {
-                    currentQ: 0,
-                    score: 0,
-                    answered: false
-                };
+                gameState.minigameState = { currentQ: 0, score: 0 };
             }
             
             const state = gameState.minigameState;
             const question = minigame.questions[state.currentQ];
             
-            // UI
-            ctx.fillStyle = '#000a';
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
             ctx.fillRect(50, 50, 700, 80);
             ctx.fillStyle = '#fff';
-            ctx.font = '14px "Press Start 2P"';
+            ctx.font = '12px "Press Start 2P"';
             ctx.textAlign = 'center';
+            ctx.fillText(`Question ${state.currentQ + 1}/${minigame.questions.length}`, canvas.width / 2, 100);
+            
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = '11px "Press Start 2P"';
+            drawText(question.q, 70, 180, 11, '#00d4ff');
+            
+            for (let i = 0; i < question.options.length; i++) {
+                if (drawButton(question.options[i], 150, 280 + i * 80, 500, 60)) {
+                    if (i === question.correct) {
+                        state.score++;
+                    }
+                    state.currentQ++;
+                    if (state.currentQ >= minigame.questions.length) {
+                        advanceScene();
+                    }
+                }
+            }
+        }
+        
+        function renderFailScreen(message) {
+            ctx.fillStyle = 'rgba(0,0,0,0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#f00';
+            ctx.font = '20px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText("TIME'S UP!", canvas.width / 2, 250);
+            ctx.fillStyle = '#fff';
+            drawText(message, 100, 320, 11, '#fff');
+            
+            if (drawButton("TRY AGAIN", 300, 420, 200, 50)) {
+                gameState.minigameState = null;
+            }
+        }
+        
+        // MAIN GAME LOOP
+        function gameLoop() {
+            const now = Date.now();
+            const delta = now - lastTime;
+            
+            blinkTimer += delta;
+            if (blinkTimer > 500) {
+                gameState.blinkState = !gameState.blinkState;
+                blinkTimer = 0;
+            }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            switch (gameState.screen) {
+                case 'start': renderStartScreen(); break;
+                case 'levelSelect': renderLevelSelect(); break;
+                case 'dialogue': renderDialogue(); break;
+                case 'minigame': renderMinigame(); break;
+                case 'photo': renderPhoto(); break;
+            }
+            
+            mouseClicked = false;
+            lastTime = now;
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // START THE GAME
+        gameLoop();
+    </script>
+</body>
+</html>
