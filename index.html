@@ -6,1925 +6,231 @@
     <title>Edoardo's Quest: From Milan to Marketing</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            background:#1a1a2e;
+            font-family:'Press Start 2P',cursive;
+            color:#eee;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
         }
-
-        body {
-            background: #1a1a2e;
-            font-family: 'Press Start 2P', cursive;
-            color: #eee;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        #game-container{
+            width:800px;
+            height:600px;
+            background:linear-gradient(180deg,#16213e 0%,#1a1a2e 100%);
+            border:4px solid #e94560;
+            border-radius:8px;
+            position:relative;
+            overflow:hidden;
+            box-shadow:0 0 20px #e94560,inset 0 0 50px rgba(233,69,96,0.1);
         }
-
-        #game-container {
-            width: 800px;
-            height: 600px;
-            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
-            border: 4px solid #e94560;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 20px #e94560, inset 0 0 50px rgba(233,69,96,0.1);
+        .screen{
+            display:none;
+            width:100%;
+            height:100%;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+            text-align:center;
         }
-
-        .screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
+        .screen.active{display:flex;}
+        h1{
+            font-size:18px;
+            color:#e94560;
+            text-shadow:2px 2px #0f3460;
+            margin-bottom:20px;
+            line-height:1.6;
         }
-
-        .screen.active {
-            display: flex;
+        h2{font-size:14px;color:#f9d923;margin-bottom:15px;}
+        p,.dialogue{font-size:10px;line-height:2;margin:10px 0;max-width:700px;}
+        .blink{animation:blink 1s infinite;}
+        @keyframes blink{0%,50%{opacity:1;}51%,100%{opacity:0;}}
+        .btn{
+            font-family:'Press Start 2P',cursive;
+            font-size:12px;
+            padding:15px 30px;
+            margin:10px;
+            background:#0f3460;
+            color:#eee;
+            border:3px solid #e94560;
+            cursor:pointer;
+            transition:all .2s;
         }
-
-        h1 {
-            font-size: 18px;
-            color: #e94560;
-            text-shadow: 2px 2px #0f3460;
-            margin-bottom: 20px;
-            line-height: 1.6;
+        .btn:hover{background:#e94560;transform:scale(1.05);}
+        .btn:disabled{opacity:.5;cursor:not-allowed;}
+        .btn:disabled:hover{background:#0f3460;transform:none;}
+        .pixel-scene{
+            width:100%;
+            height:200px;
+            background:linear-gradient(180deg,#87ceeb 0%,#87ceeb 60%,#228b22 60%,#228b22 100%);
+            position:relative;
+            margin:20px 0;
+            border:3px solid #333;
+            image-rendering:pixelated;
         }
-
-        h2 {
-            font-size: 14px;
-            color: #f9d923;
-            margin-bottom: 15px;
+        .pixel-scene.london{
+            background:linear-gradient(180deg,#708090 0%,#708090 60%,#4a4a4a 60%,#4a4a4a 100%);
         }
-
-        p, .dialogue {
-            font-size: 10px;
-            line-height: 2;
-            margin: 10px 0;
-            max-width: 700px;
+        .pixel-scene.modern{
+            background:linear-gradient(180deg,#2c3e50 0%,#2c3e50 60%,#34495e 60%,#34495e 100%);
         }
-
-        .blink {
-            animation: blink 1s infinite;
+        .building{
+            position:absolute;
+            bottom:0;
+            background:#8b4513;
+            border:2px solid #5d3a1a;
         }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+        .sun{
+            position:absolute;
+            top:20px;
+            right:40px;
+            width:40px;
+            height:40px;
+            background:#f9d923;
+            border-radius:50%;
+            box-shadow:0 0 20px #f9d923;
         }
-
-        .btn {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            padding: 15px 30px;
-            margin: 10px;
-            background: #0f3460;
-            color: #eee;
-            border: 3px solid #e94560;
-            cursor: pointer;
-            transition: all 0.2s;
+        #pizza-game,#bartender-game,#quiz-game{
+            width:100%;
+            height:100%;
+            position:relative;
         }
-
-        .btn:hover {
-            background: #e94560;
-            transform: scale(1.05);
+        .game-header{
+            display:flex;
+            justify-content:space-between;
+            padding:10px 20px;
+            background:#0f3460;
+            border-bottom:3px solid #e94560;
         }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .game-area{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
         }
-
-        .btn:disabled:hover {
-            background: #0f3460;
-            transform: none;
+        .pizza-table{display:flex;gap:20px;margin:20px 0;}
+        .cousin{
+            width:80px;height:100px;
+            background:#0f3460;
+            border:3px solid #e94560;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            transition:transform .2s;
         }
-
-        /* Pixel Art Characters */
-        .pixel-scene {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 60%, #228b22 60%, #228b22 100%);
-            position: relative;
-            margin: 20px 0;
-            border: 3px solid #333;
-            image-rendering: pixelated;
+        .cousin:hover{transform:scale(1.1);}
+        .cousin.correct{background:#228b22;animation:pulse .5s;}
+        .cousin.wrong{background:#dc143c;animation:shake .5s;}
+        @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.2);}}
+        @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}
+        .cousin-face{font-size:24px;}
+        .cousin-want{font-size:20px;margin-top:5px;}
+        .pizza-belt{
+            display:flex;
+            gap:15px;
+            padding:15px;
+            background:#333;
+            border:3px solid #666;
+            margin-top:20px;
         }
-
-        .pixel-scene.london {
-            background: linear-gradient(180deg, #708090 0%, #708090 60%, #4a4a4a 60%, #4a4a4a 100%);
+        .pizza-item{
+            font-size:32px;
+            cursor:grab;
+            transition:transform .2s;
+            padding:5px;
         }
-
-        .pixel-scene.modern {
-            background: linear-gradient(180deg, #2c3e50 0%, #2c3e50 60%, #34495e 60%, #34495e 100%);
+        .pizza-item:hover{transform:scale(1.2);}
+        .pizza-item.selected{background:#e94560;border-radius:8px;}
+        .drink-orders{display:flex;gap:15px;margin:15px 0;}
+        .order{padding:10px 15px;background:#0f3460;border:2px solid #e94560;font-size:10px;}
+        .order.completed{background:#228b22;}
+        .ingredients{display:flex;gap:10px;margin:15px 0;}
+        .ingredient{font-size:28px;cursor:pointer;padding:10px;border:2px solid transparent;transition:all .2s;}
+        .ingredient:hover{border-color:#e94560;transform:scale(1.1);}
+        .mixing-area{
+            min-height:60px;min-width:200px;
+            background:#1a1a2e;
+            border:3px dashed #e94560;
+            margin:15px 0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:24px;
+            gap:5px;
         }
-
-        .building {
-            position: absolute;
-            bottom: 0;
-            background: #8b4513;
-            border: 2px solid #5d3a1a;
+        .quiz-question{font-size:11px;margin:20px 0;line-height:1.8;}
+        .quiz-options{display:flex;flex-direction:column;gap:10px;width:100%;max-width:500px;}
+        .quiz-option{
+            padding:12px 20px;
+            background:#0f3460;
+            border:2px solid #e94560;
+            cursor:pointer;
+            font-size:9px;
+            text-align:left;
+            transition:all .2s;
         }
-
-        .sun {
-            position: absolute;
-            top: 20px;
-            right: 40px;
-            width: 40px;
-            height: 40px;
-            background: #f9d923;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #f9d923;
+        .quiz-option:hover{background:#e94560;}
+        .quiz-option.correct{background:#228b22;border-color:#228b22;}
+        .quiz-option.wrong{background:#dc143c;border-color:#dc143c;}
+        .score-display{font-size:12px;color:#f9d923;}
+        .photo-modal{
+            display:none;
+            position:absolute;
+            top:0;left:0;
+            width:100%;height:100%;
+            background:rgba(0,0,0,0.9);
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            z-index:100;
         }
-
-        /* Mini-game styles */
-        #pizza-game, #bartender-game, #quiz-game {
-            width: 100%;
-            height: 100%;
-            position: relative;
+        .photo-modal.active{display:flex;}
+        .photo-placeholder{
+            width:400px;height:300px;
+            background:#333;
+            border:4px solid #e94560;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            margin:20px;
         }
-
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: #0f3460;
-            border-bottom: 3px solid #e94560;
+        .photo-placeholder img{
+            max-width:100%;
+            max-height:100%;
+            object-fit:contain;
         }
-
-        .game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .photo-text{font-size:10px;color:#888;}
+        .dialogue-box{
+            background:#0f3460;
+            border:3px solid #e94560;
+            padding:20px;
+            margin:15px 0;
+            max-width:700px;
+            max-height:200px;
+            overflow-y:auto;
         }
-
-        /* Pizza Game */
-        .pizza-table {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .cousin {
-            width: 80px;
-            height: 100px;
-            background: #0f3460;
-            border: 3px solid #e94560;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .cousin:hover {
-            transform: scale(1.1);
-        }
-
-        .cousin.correct {
-            background: #228b22;
-            animation: pulse 0.5s;
-        }
-
-        .cousin.wrong {
-            background: #dc143c;
-            animation: shake 0.5s;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        .cousin-face {
-            font-size: 24px;
-        }
-
-        .cousin-want {
-            font-size: 20px;
-            margin-top: 5px;
-        }
-
-        .pizza-belt {
-            display: flex;
-            gap: 15px;
-            padding: 15px;
-            background: #333;
-            border: 3px solid #666;
-            margin-top: 20px;
-        }
-
-        .pizza-item {
-            font-size: 32px;
-            cursor: grab;
-            transition: transform 0.2s;
-            padding: 5px;
-        }
-
-        .pizza-item:hover {
-            transform: scale(1.2);
-        }
-
-        .pizza-item.selected {
-            background: #e94560;
-            border-radius: 8px;
-        }
-
-        /* Bartender Game */
-        .drink-orders {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
-        }
-
-        .order {
-            padding: 10px 15px;
-            background: #0f3460;
-            border: 2px solid #e94560;
-            font-size: 10px;
-        }
-
-        .order.completed {
-            background: #228b22;
-        }
-
-        .ingredients {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .ingredient {
-            font-size: 28px;
-            cursor: pointer;
-            padding: 10px;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .ingredient:hover {
-            border-color: #e94560;
-            transform: scale(1.1);
-        }
-
-        .mixing-area {
-            min-height: 60px;
-            min-width: 200px;
-            background: #1a1a2e;
-            border: 3px dashed #e94560;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            gap: 5px;
-        }
-
-        /* Quiz Game */
-        .quiz-question {
-            font-size: 11px;
-            margin: 20px 0;
-            line-height: 1.8;
-        }
-
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .quiz-option {
-            padding: 12px 20px;
-            background: #0f3460;
-            border: 2px solid #e94560;
-            cursor: pointer;
-            font-size: 9px;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .quiz-option:hover {
-            background: #e94560;
-        }
-
-        .quiz-option.correct {
-            background: #228b22;
-            border-color: #228b22;
-        }
-
-        .quiz-option.wrong {
-            background: #dc143c;
-            border-color: #dc143c;
-        }
-
-        .score-display {
-            font-size: 12px;
-            color: #f9d923;
-        }
-
-        /* Photo Modal */
-        .photo-modal {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .photo-modal.active {
-            display: flex;
-        }
-
-        .photo-placeholder {
-            width: 400px;
-            height: 300px;
-            background: #333;
-            border: 4px solid #e94560;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            margin: 20px;
-        }
-
-        .photo-placeholder img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .photo-text {
-            font-size: 10px;
-            color: #888;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .level-indicator {
-            width: 20px;
-            height: 20px;
-            background: #333;
-            border: 2px solid #e94560;
-        }
-
-        .level-indicator.complete {
-            background: #228b22;
-        }
-
-        .level-indicator.current {
-            background: #f9d923;
-        }
-
-        /* Dialogue Box */
-        .dialogue-box {
-            background: #0f3460;
-            border: 3px solid #e94560;
-            padding: 20px;
-            margin: 15px 0;
-            max-width: 700px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .dialogue-box p {
-            margin: 8px 0;
-        }
-
-        /* Timer */
-        .timer {
-            font-size: 14px;
-            color: #f9d923;
-        }
-
-        .timer.warning {
-            color: #e94560;
-            animation: blink 0.5s infinite;
-        }
+        .dialogue-box p{margin:8px 0;}
+        .timer{font-size:14px;color:#f9d923;}
+        .timer.warning{color:#e94560;animation:blink .5s infinite;}
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <!-- START SCREEN -->
-        <div id="start-screen" class="screen active">
-            <h1>🎮 EDOARDO'S QUEST 🎮<br><span style="font-size:12px; color:#f9d923;">From Milan to Marketing</span></h1>
-            <div class="pixel-scene">
-                <div class="sun"></div>
-                <div class="building" style="left:50px; width:60px; height:80px;"></div>
-                <div class="building" style="left:130px; width:80px; height:100px; background:#a0522d;"></div>
-                <div class="building" style="left:230px; width:50px; height:70px;"></div>
-                <div class="building" style="right:100px; width:100px; height:90px; background:#696969;"></div>
-                <div class="building" style="right:30px; width:60px; height:110px; background:#778899;"></div>
-            </div>
-            <p>An interactive journey through the life of Edoardo</p>
-            <p class="blink" style="color:#f9d923; margin-top:30px;">PRESS START</p>
-            <button class="btn" onclick="startGame()">START</button>
-        </div>
-
-        <!-- LEVEL SELECT -->
-        <div id="level-select" class="screen">
-            <h1>SELECT LEVEL</h1>
-            <div style="display:flex; gap:20px; margin-top:30px;">
-                <button class="btn" id="level1-btn" onclick="startLevel(1)">LEVEL 1<br><span style="font-size:8px;">Italian Origins</span></button>
-                <button class="btn" id="level2-btn" onclick="startLevel(2)" disabled>LEVEL 2<br><span style="font-size:8px;">London Leap</span></button>
-                <button class="btn" id="level3-btn" onclick="startLevel(3)" disabled>LEVEL 3<br><span style="font-size:8px;">Life Today</span></button>
-            </div>
-        </div>
-
-        <!-- LEVEL 1: INTRO -->
-        <div id="level1-intro" class="screen">
-            <h2>LEVEL 1: THE ITALIAN ORIGINS</h2>
-            <div class="pixel-scene">
-                <div class="sun"></div>
-                <div class="building" style="left:50px; width:100px; height:80px; background:#d2691e;"></div>
-                <div class="building" style="left:170px; width:120px; height:100px; background:#8b4513;">
-                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:8px; color:#f9d923;">THE FRIENDS PUB</div>
-                </div>
-                <div class="building" style="right:50px; width:80px; height:90px; background:#a0522d;"></div>
-            </div>
-            <div class="dialogue-box">
-                <p>🇮🇹 Benvenuti in Milan! This is where Edoardo's story begins.</p>
-                <p>👨‍👩‍👦‍👦 He grew up in a big Italian family: mum, dad, younger brother Ricky (Gen Z alert), and 14 cousins!</p>
-                <p>📚 In Milan, he studied mechanical engineering while working at the family pub, "The Friends".</p>
-                <p>🍸 He even got certified as a bartender!</p>
-            </div>
-            <button class="btn" onclick="startMiniGame(1)">START MINI-GAME: PIZZA DASH</button>
-        </div>
-
-        <!-- LEVEL 1: MINI-GAME (PIZZA) -->
-        <div id="level1-game" class="screen">
-            <div id="pizza-game">
-                <div class="game-header">
-                    <span>LEVEL 1: PIZZA DASH</span>
-                    <span class="timer" id="pizza-timer">⏱️ 30s</span>
-                    <span class="score-display" id="pizza-score">Score: 0/5</span>
-                </div>
-                <div class="game-area">
-                    <p>Click a pizza, then click the cousin who wants it!</p>
-                    <div class="pizza-table" id="cousins-container"></div>
-                    <div class="pizza-belt" id="pizza-belt"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 1: STORY UNLOCK -->
-        <div id="level1-story" class="screen">
-            <h2>✨ STORY UNLOCKED ✨</h2>
-            <div class="dialogue-box">
-                <p>💭 While working at The Friends pub and studying mechanical engineering, Edoardo realised something important...</p>
-                <p>❌ He didn't enjoy mechanical engineering. At all.</p>
-                <p>🎭 So he changed direction completely and started studying DRAMA in Milan!</p>
-                <p>🎬 Stage over spreadsheets. Cue dramatic music...</p>
-            </div>
-            <button class="btn" onclick="showPhoto(1)">📸 VIEW PHOTO</button>
-            <button class="btn" onclick="unlockLevel(2)">CONTINUE →</button>
-        </div>
-
-        <!-- LEVEL 2: INTRO -->
-        <div id="level2-intro" class="screen">
-            <h2>LEVEL 2: THE LONDON LEAP</h2>
-            <div class="pixel-scene london">
-                <div class="building" style="left:30px; width:60px; height:100px; background:#8b0000;">
-                    <div style="background:#f9d923; width:20px; height:40px; position:absolute; bottom:0; left:20px;"></div>
-                </div>
-                <div class="building" style="left:110px; width:140px; height:80px; background:#696969;">
-                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:6px; color:#fff;">ALRA DRAMA SCHOOL</div>
-                </div>
-                <div class="building" style="right:30px; width:100px; height:120px; background:#2f4f4f;"></div>
-                <div style="position:absolute; bottom:30px; right:200px; width:60px; height:30px; background:#cc0000; border-radius:5px;">
-                    <div style="font-size:6px; color:#fff; text-align:center; padding-top:8px;">BUS</div>
-                </div>
-            </div>
-            <div class="dialogue-box">
-                <p>🇬🇧 In 2014, at 21, Edoardo moved to London!</p>
-                <p>🎭 He worked in hospitality and attended ALRA (Academy of Live and Recorded Arts).</p>
-                <p>💷 Great experience, but London life was expensive...</p>
-                <p>📖 At 25, he discovered self-improvement: books, digital marketing, and Shopify!</p>
-            </div>
-            <button class="btn" onclick="startMiniGame(2)">START MINI-GAME: BARTENDER HUSTLE</button>
-        </div>
-
-        <!-- LEVEL 2: MINI-GAME (BARTENDER) -->
-        <div id="level2-game" class="screen">
-            <div id="bartender-game">
-                <div class="game-header">
-                    <span>LEVEL 2: BARTENDER HUSTLE</span>
-                    <span class="timer" id="bartender-timer">⏱️ 45s</span>
-                    <span class="score-display" id="bartender-score">Drinks: 0/4</span>
-                </div>
-                <div class="game-area">
-                    <p>Make the drinks! Click ingredients in order, then SERVE.</p>
-                    <div class="drink-orders" id="drink-orders"></div>
-                    <div class="ingredients" id="ingredients"></div>
-                    <div class="mixing-area" id="mixing-area">Drop ingredients here</div>
-                    <button class="btn" onclick="serveDrink()">🍸 SERVE</button>
-                    <button class="btn" onclick="clearMix()" style="font-size:10px;">CLEAR</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 2: STORY UNLOCK -->
-        <div id="level2-story" class="screen">
-            <h2>✨ STORY UNLOCKED ✨</h2>
-            <div class="dialogue-box">
-                <p>📚 At 25, Edoardo felt a bit lost but decided to invest in himself.</p>
-                <p>💻 He started a Shopify store, learned dropshipping and digital marketing.</p>
-                <p>🦠 During COVID, he doubled down on studies to leave hospitality for good.</p>
-                <p>🎉 Mission accomplished: He landed a job at DIAGEO! (Thanks, Olga!)</p>
-            </div>
-            <button class="btn" onclick="showPhoto(2)">📸 VIEW PHOTO</button>
-            <button class="btn" onclick="unlockLevel(3)">CONTINUE →</button>
-        </div>
-
-        <!-- LEVEL 3: INTRO -->
-        <div id="level3-intro" class="screen">
-            <h2>LEVEL 3: LIFE TODAY & BEYOND</h2>
-            <div class="pixel-scene modern">
-                <div style="position:absolute; top:20px; left:30px; font-size:24px;">💻</div>
-                <div style="position:absolute; top:20px; right:30px; font-size:24px;">♟️</div>
-                <div style="position:absolute; bottom:50px; left:50%; transform:translateX(-50%); font-size:32px;">🌍</div>
-                <div style="position:absolute; top:60px; left:50%; transform:translateX(-50%); font-size:10px; color:#f9d923;">🇱🇹 LITHUANIA</div>
-            </div>
-            <div class="dialogue-box">
-                <p>❤️ Edoardo has a lovely girlfriend, Reda, from Lithuania!</p>
-                <p>🗺️ Fun fact: Lithuania is Europe's flattest country. Perfect for flat-earther jokes!</p>
-                <p>🤖 He's a geek who loves AI, reads about shipwrecks (The Wager), and plays chess.</p>
-                <p>🎭 Drama isn't dead - he's joining an improv course next month!</p>
-            </div>
-            <button class="btn" onclick="startMiniGame(3)">START MINI-GAME: QUIZ OF LIFE</button>
-        </div>
-
-        <!-- LEVEL 3: MINI-GAME (QUIZ) -->
-        <div id="level3-game" class="screen">
-            <div id="quiz-game">
-                <div class="game-header">
-                    <span>LEVEL 3: QUIZ OF LIFE</span>
-                    <span class="score-display" id="quiz-score">Score: 0/6</span>
-                </div>
-                <div class="game-area">
-                    <p class="quiz-question" id="quiz-question"></p>
-                    <div class="quiz-options" id="quiz-options"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 3: STORY UNLOCK / FINALE -->
-        <div id="level3-story" class="screen">
-            <h2>🎉 CONGRATULATIONS! 🎉</h2>
-            <div class="dialogue-box">
-                <p>🏆 You've unlocked Edoardo's full story!</p>
-                <p>🇮🇹 From Milan family chaos and The Friends pub...</p>
-                <p>🇬🇧 To drama school in London, self-improvement, and career transformation...</p>
-                <p>🚀 Today: A curious, geeky, travel-loving team member at Diageo!</p>
-                <p style="color:#f9d923;">🍕 Favourite foods: Pizza, Lasagna, Carbonara, Gelato 🍨</p>
-            </div>
-            <button class="btn" onclick="showPhoto(3)">📸 VIEW FINAL PHOTOS</button>
-            <button class="btn" onclick="showScreen('start-screen')">🔄 PLAY AGAIN</button>
-        </div>
-
-        <!-- PHOTO MODAL -->
-        <div id="photo-modal" class="photo-modal">
-            <div class="photo-placeholder">
-                <p class="photo-text" id="photo-label">📷 PHOTO PLACEHOLDER</p>
-                <p class="photo-text" style="font-size:8px; margin-top:10px;" id="photo-hint">Replace with your image!</p>
-                <!-- TO ADD YOUR PHOTO: Replace the src below with your image URL or local path -->
-                <!-- <img src="your-photo.jpg" alt="Photo"> -->
-            </div>
-            <button class="btn" onclick="closePhoto()">CLOSE</button>
-        </div>
-    </div>
-
-    <script>
-        // ========== GAME STATE ==========
-        let gameState = {
-            currentLevel: 1,
-            levelsUnlocked: [true, false, false],
-            levelsComplete: [false, false, false]
-        };
-
-        // ========== SCREEN MANAGEMENT ==========
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function startGame() {
-            showScreen('level-select');
-            updateLevelButtons();
-        }
-
-        function updateLevelButtons() {
-            document.getElementById('level1-btn').disabled = !gameState.levelsUnlocked[0];
-            document.getElementById('level2-btn').disabled = !gameState.levelsUnlocked[1];
-            document.getElementById('level3-btn').disabled = !gameState.levelsUnlocked[2];
-        }
-
-        function startLevel(level) {
-            gameState.currentLevel = level;
-            showScreen(`level${level}-intro`);
-        }
-
-        function unlockLevel(level) {
-            if (level <= 3) {
-                gameState.levelsUnlocked[level - 1] = true;
-                gameState.levelsComplete[gameState.currentLevel - 1] = true;
-                if (level <= 3) {
-                    showScreen(`level${level}-intro`);
-                }
-            }
-            updateLevelButtons();
-        }
-
-        // ========== MINI-GAME LAUNCHER ==========
-        function startMiniGame(level) {
-            showScreen(`level${level}-game`);
-            if (level === 1) initPizzaGame();
-            if (level === 2) initBartenderGame();
-            if (level === 3) initQuizGame();
-        }
-
-        // ========== LEVEL 1: PIZZA GAME ==========
-        const pizzaTypes = ['🍕', '🍕', '🍕'];
-        const pizzaNames = ['Margherita', 'Pepperoni', 'Veggie'];
-        const pizzaEmoji = ['🧀', '🥓', '🥦'];
-        let pizzaScore = 0;
-        let pizzaTimer = 30;
-        let pizzaInterval;
-        let selectedPizza = null;
-        let cousinsData = [];
-
-        function initPizzaGame() {
-            pizzaScore = 0;
-            pizzaTimer = 30;
-            selectedPizza = null;
-            document.getElementById('pizza-score').textContent = `Score: 0/5`;
-            document.getElementById('pizza-timer').textContent = `⏱️ ${pizzaTimer}s`;
-            document.getElementById('pizza-timer').classList.remove('warning');
-
-            // Generate cousins
-            const container = document.getElementById('cousins-container');
-            container.innerHTML = '';
-            cousinsData = [];
-            const faces = ['👦', '👧', '👴', '👵', '👨'];
-            for (let i = 0; i < 5; i++) {
-                const wantIndex = Math.floor(Math.random() * 3);
-                cousinsData.push({ want: wantIndex, served: false });
-                container.innerHTML += `
-                    <div class="cousin" id="cousin-${i}" onclick="servePizzaToCousin(${i})">
-                        <span class="cousin-face">${faces[i]}</span>
-                        <span class="cousin-want">${pizzaEmoji[wantIndex]}</span>
-                    </div>
-                `;
-            }
-
-            // Generate pizza belt
-            const belt = document.getElementById('pizza-belt');
-            belt.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                belt.innerHTML += `
-                    <div class="pizza-item" id="pizza-${i}" onclick="selectPizza(${i})">
-                        ${pizzaTypes[i]}${pizzaEmoji[i]}
-                    </div>
-                `;
-            }
-
-            // Start timer
-            clearInterval(pizzaInterval);
-            pizzaInterval = setInterval(() => {
-                pizzaTimer--;
-                document.getElementById('pizza-timer').textContent = `⏱️ ${pizzaTimer}s`;
-                if (pizzaTimer <= 10) {
-                    document.getElementById('pizza-timer').classList.add('warning');
-                }
-                if (pizzaTimer <= 0) {
-                    clearInterval(pizzaInterval);
-                    alert('Time's up! The family staged a pasta mutiny. Try again!');
-                    initPizzaGame();
-                }
-            }, 1000);
-        }
-
-        function selectPizza(index) {
-            document.querySelectorAll('.pizza-item').forEach(p => p.classList.remove('selected'));
-            document.getElementById(`pizza-${index}`).classList.add('selected');
-            selectedPizza = index;
-        }
-
-        function servePizzaToCousin(cousinIndex) {
-            if (selectedPizza === null) return;
-            if (cousinsData[cousinIndex].served) return;
-
-            const cousinEl = document.getElementById(`cousin-${cousinIndex}`);
-            if (cousinsData[cousinIndex].want === selectedPizza) {
-                cousinEl.classList.add('correct');
-                cousinsData[cousinIndex].served = true;
-                pizzaScore++;
-                document.getElementById('pizza-score').textContent = `Score: ${pizzaScore}/5`;
-                if (pizzaScore >= 5) {
-                    clearInterval(pizzaInterval);
-                    setTimeout(() => {
-                        alert('🎉 Perfect! All cousins are happy!');
-                        showScreen('level1-story');
-                    }, 500);
-                }
-            } else {
-                cousinEl.classList.add('wrong');
-                setTimeout(() => cousinEl.classList.remove('wrong'), 500);
-            }
-            selectedPizza = null;
-            document.querySelectorAll('.pizza-item').forEach(p => p.classList.remove('selected'));
-        }
-
-        // ========== LEVEL 2: BARTENDER GAME ==========
-        const drinks = [
-            { name: 'Beer', recipe: ['🍺'], emoji: '🍺' },
-            { name: 'G&T', recipe: ['🧊', '🍸'], emoji: '🍸' },
-            { name: 'Cocktail', recipe: ['🧊', '🍹', '🍋'], emoji: '🍹' },
-            { name: 'Coffee', recipe: ['☕'], emoji: '☕' }
-        ];
-        const allIngredients = ['🍺', '🧊', '🍸', '🍹', '🍋', '☕'];
-        let bartenderScore = 0;
-        let bartenderTimer = 45;
-        let bartenderInterval;
-        let currentMix = [];
-        let currentOrders = [];
-
-        function initBartenderGame() {
-            bartenderScore = 0;
-            bartenderTimer = 45;
-            currentMix = [];
-            document.getElementById('bartender-score').textContent = `Drinks: 0/4`;
-            document.getElementById('bartender-timer').textContent = `⏱️ ${bartenderTimer}s`;
-            document.getElementById('bartender-timer').classList.remove('warning');
-            document.getElementById('mixing-area').innerHTML = 'Drop ingredients here';
-
-            // Generate orders
-            currentOrders = [...drinks].sort(() => Math.random() - 0.5);
-            const ordersEl = document.getElementById('drink-orders');
-            ordersEl.innerHTML = '';
-            currentOrders.forEach((d, i) => {
-                ordersEl.innerHTML += `<div class="order" id="order-${i}">${d.emoji} ${d.name}</div>`;
-            });
-
-            // Generate ingredients
-            const ingredientsEl = document.getElementById('ingredients');
-            ingredientsEl.innerHTML = '';
-            allIngredients.forEach((ing, i) => {
-                ingredientsEl.innerHTML += `<div class="ingredient" onclick="addIngredient('${ing}')">${ing}</div>`;
-            });
-
-            // Start timer
-            clearInterval(bartenderInterval);
-            bartenderInterval = setInterval(() => {
-                bartenderTimer--;
-                document.getElementById('bartender-timer').textContent = `⏱️ ${bartenderTimer}s`;
-                if (bartenderTimer <= 10) {
-                    document.getElementById('bartender-timer').classList.add('warning');
-                }
-                if (bartenderTimer <= 0) {
-                    clearInterval(bartenderInterval);
-                    alert('Time's up! The manager gives you a pep talk. Try again!');
-                    initBartenderGame();
-                }
-            }, 1000);
-        }
-
-        function addIngredient(ing) {
-            if (currentMix.length < 4) {
-                currentMix.push(ing);
-                document.getElementById('mixing-area').innerHTML = currentMix.join(' ');
-            }
-        }
-
-        function clearMix() {
-            currentMix = [];
-            document.getElementById('mixing-area').innerHTML = 'Drop ingredients here';
-        }
-
-        function serveDrink() {
-            if (currentMix.length === 0) return;
-
-            // Check if mix matches any remaining order
-            for (let i = 0; i < currentOrders.length; i++) {
-                const order = currentOrders[i];
-                if (!order.done && JSON.stringify(currentMix) === JSON.stringify(order.recipe)) {
-                    order.done = true;
-                    document.getElementById(`order-${i}`).classList.add('completed');
-                    bartenderScore++;
-                    document.getElementById('bartender-score').textContent = `Drinks: ${bartenderScore}/4`;
-                    clearMix();
-                    if (bartenderScore >= 4) {
-                        clearInterval(bartenderInterval);
-                        setTimeout(() => {
-                            alert('🎉 All drinks served! You're a pro!');
-                            showScreen('level2-story');
-                        }, 500);
-                    }
-                    return;
-                }
-            }
-            alert('❌ That doesn't match any order! Try again.');
-            clearMix();
-        }
-
-        // ========== LEVEL 3: QUIZ GAME ==========
-        const quizQuestions = [
-            {
-                q: "Where is Edoardo originally from?",
-                options: ["Milan, Italy", "Rome, Italy", "Madrid, Spain"],
-                correct: 0
-            },
-            {
-                q: "What did Edoardo first study at university?",
-                options: ["Economics", "Mechanical Engineering", "Computer Science"],
-                correct: 1
-            },
-            {
-                q: "What is the name of his family pub in Milan?",
-                options: ["The Mates", "The Friends", "The Buddies"],
-                correct: 1
-            },
-            {
-                q: "What drama school did he attend in London?",
-                options: ["RADA", "ALRA", "LAMDA"],
-                correct: 1
-            },
-            {
-                q: "What is Edoardo's chess ELO goal?",
-                options: ["500", "1000", "2000"],
-                correct: 1
-            },
-            {
-                q: "What country is his girlfriend Reda from?",
-                options: ["Latvia", "Lithuania", "Estonia"],
-                correct: 1
-            }
-        ];
-        let quizIndex = 0;
-        let quizScore = 0;
-
-        function initQuizGame() {
-            quizIndex = 0;
-            quizScore = 0;
-            document.getElementById('quiz-score').textContent = `Score: 0/6`;
-            showQuizQuestion();
-        }
-
-        function showQuizQuestion() {
-            if (quizIndex >= quizQuestions.length) {
-                if (quizScore >= 4) {
-                    setTimeout(() => {
-                        alert(`🎉 Amazing! You scored ${quizScore}/6! You really know Edoardo!`);
-                        showScreen('level3-story');
-                    }, 300);
-                } else {
-                    alert(`You scored ${quizScore}/6. Let's try again!`);
-                    initQuizGame();
-                }
-                return;
-            }
-
-            const q = quizQuestions[quizIndex];
-            document.getElementById('quiz-question').textContent = `Q${quizIndex + 1}: ${q.q}`;
-            const optionsEl = document.getElementById('quiz-options');
-            optionsEl.innerHTML = '';
-            q.options.forEach((opt, i) => {
-                optionsEl.innerHTML += `<div class="quiz-option" id="opt-${i}" onclick="answerQuiz(${i})">${opt}</div>`;
-            });
-        }
-
-        function answerQuiz(index) {
-            const q = quizQuestions[quizIndex];
-            const optEl = document.getElementById(`opt-${index}`);
-            if (index === q.correct) {
-                optEl.classList.add('correct');
-                quizScore++;
-            } else {
-                optEl.classList.add('wrong');
-                document.getElementById(`opt-${q.correct}`).classList.add('correct');
-            }
-            document.getElementById('quiz-score').textContent = `Score: ${quizScore}/6`;
-
-            // Disable all options
-            document.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'none');
-
-            setTimeout(() => {
-                quizIndex++;
-                showQuizQuestion();
-            }, 1000);
-        }
-
-        // ========== PHOTO MODAL ==========
-        const photoLabels = [
-            "📷 Edoardo's Family in Milan",
-            "📷 Edoardo in London / Drama School",
-            "📷 Edoardo & Reda / Travel Adventures"
-        ];
-
-        function showPhoto(level) {
-            document.getElementById('photo-label').textContent = photoLabels[level - 1];
-            document.getElementById('photo-hint').textContent = "Replace this placeholder with your actual photo!";
-            document.getElementById('photo-modal').classList.add('active');
-        }
-
-        function closePhoto() {
-            document.getElementById('photo-modal').classList.remove('active');
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edoardo's Quest: From Milan to Marketing</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #1a1a2e;
-            font-family: 'Press Start 2P', cursive;
-            color: #eee;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #game-container {
-            width: 800px;
-            height: 600px;
-            background: linear-gradient(180deg, #16213e 0%, #1a1a2e 100%);
-            border: 4px solid #e94560;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 20px #e94560, inset 0 0 50px rgba(233,69,96,0.1);
-        }
-
-        .screen {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .screen.active {
-            display: flex;
-        }
-
-        h1 {
-            font-size: 18px;
-            color: #e94560;
-            text-shadow: 2px 2px #0f3460;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        h2 {
-            font-size: 14px;
-            color: #f9d923;
-            margin-bottom: 15px;
-        }
-
-        p, .dialogue {
-            font-size: 10px;
-            line-height: 2;
-            margin: 10px 0;
-            max-width: 700px;
-        }
-
-        .blink {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-
-        .btn {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 12px;
-            padding: 15px 30px;
-            margin: 10px;
-            background: #0f3460;
-            color: #eee;
-            border: 3px solid #e94560;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: #e94560;
-            transform: scale(1.05);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn:disabled:hover {
-            background: #0f3460;
-            transform: none;
-        }
-
-        /* Pixel Art Characters */
-        .pixel-scene {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(180deg, #87ceeb 0%, #87ceeb 60%, #228b22 60%, #228b22 100%);
-            position: relative;
-            margin: 20px 0;
-            border: 3px solid #333;
-            image-rendering: pixelated;
-        }
-
-        .pixel-scene.london {
-            background: linear-gradient(180deg, #708090 0%, #708090 60%, #4a4a4a 60%, #4a4a4a 100%);
-        }
-
-        .pixel-scene.modern {
-            background: linear-gradient(180deg, #2c3e50 0%, #2c3e50 60%, #34495e 60%, #34495e 100%);
-        }
-
-        .building {
-            position: absolute;
-            bottom: 0;
-            background: #8b4513;
-            border: 2px solid #5d3a1a;
-        }
-
-        .sun {
-            position: absolute;
-            top: 20px;
-            right: 40px;
-            width: 40px;
-            height: 40px;
-            background: #f9d923;
-            border-radius: 50%;
-            box-shadow: 0 0 20px #f9d923;
-        }
-
-        /* Mini-game styles */
-        #pizza-game, #bartender-game, #quiz-game {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background: #0f3460;
-            border-bottom: 3px solid #e94560;
-        }
-
-        .game-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        /* Pizza Game */
-        .pizza-table {
-            display: flex;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .cousin {
-            width: 80px;
-            height: 100px;
-            background: #0f3460;
-            border: 3px solid #e94560;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .cousin:hover {
-            transform: scale(1.1);
-        }
-
-        .cousin.correct {
-            background: #228b22;
-            animation: pulse 0.5s;
-        }
-
-        .cousin.wrong {
-            background: #dc143c;
-            animation: shake 0.5s;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        .cousin-face {
-            font-size: 24px;
-        }
-
-        .cousin-want {
-            font-size: 20px;
-            margin-top: 5px;
-        }
-
-        .pizza-belt {
-            display: flex;
-            gap: 15px;
-            padding: 15px;
-            background: #333;
-            border: 3px solid #666;
-            margin-top: 20px;
-        }
-
-        .pizza-item {
-            font-size: 32px;
-            cursor: grab;
-            transition: transform 0.2s;
-            padding: 5px;
-        }
-
-        .pizza-item:hover {
-            transform: scale(1.2);
-        }
-
-        .pizza-item.selected {
-            background: #e94560;
-            border-radius: 8px;
-        }
-
-        /* Bartender Game */
-        .drink-orders {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
-        }
-
-        .order {
-            padding: 10px 15px;
-            background: #0f3460;
-            border: 2px solid #e94560;
-            font-size: 10px;
-        }
-
-        .order.completed {
-            background: #228b22;
-        }
-
-        .ingredients {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .ingredient {
-            font-size: 28px;
-            cursor: pointer;
-            padding: 10px;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .ingredient:hover {
-            border-color: #e94560;
-            transform: scale(1.1);
-        }
-
-        .mixing-area {
-            min-height: 60px;
-            min-width: 200px;
-            background: #1a1a2e;
-            border: 3px dashed #e94560;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            gap: 5px;
-        }
-
-        /* Quiz Game */
-        .quiz-question {
-            font-size: 11px;
-            margin: 20px 0;
-            line-height: 1.8;
-        }
-
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .quiz-option {
-            padding: 12px 20px;
-            background: #0f3460;
-            border: 2px solid #e94560;
-            cursor: pointer;
-            font-size: 9px;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .quiz-option:hover {
-            background: #e94560;
-        }
-
-        .quiz-option.correct {
-            background: #228b22;
-            border-color: #228b22;
-        }
-
-        .quiz-option.wrong {
-            background: #dc143c;
-            border-color: #dc143c;
-        }
-
-        .score-display {
-            font-size: 12px;
-            color: #f9d923;
-        }
-
-        /* Photo Modal */
-        .photo-modal {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .photo-modal.active {
-            display: flex;
-        }
-
-        .photo-placeholder {
-            width: 400px;
-            height: 300px;
-            background: #333;
-            border: 4px solid #e94560;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            margin: 20px;
-        }
-
-        .photo-placeholder img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .photo-text {
-            font-size: 10px;
-            color: #888;
-        }
-
-        /* Progress Bar */
-        .progress-bar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .level-indicator {
-            width: 20px;
-            height: 20px;
-            background: #333;
-            border: 2px solid #e94560;
-        }
-
-        .level-indicator.complete {
-            background: #228b22;
-        }
-
-        .level-indicator.current {
-            background: #f9d923;
-        }
-
-        /* Dialogue Box */
-        .dialogue-box {
-            background: #0f3460;
-            border: 3px solid #e94560;
-            padding: 20px;
-            margin: 15px 0;
-            max-width: 700px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .dialogue-box p {
-            margin: 8px 0;
-        }
-
-        /* Timer */
-        .timer {
-            font-size: 14px;
-            color: #f9d923;
-        }
-
-        .timer.warning {
-            color: #e94560;
-            animation: blink 0.5s infinite;
-        }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <!-- START SCREEN -->
-        <div id="start-screen" class="screen active">
-            <h1>🎮 EDOARDO'S QUEST 🎮<br><span style="font-size:12px; color:#f9d923;">From Milan to Marketing</span></h1>
-            <div class="pixel-scene">
-                <div class="sun"></div>
-                <div class="building" style="left:50px; width:60px; height:80px;"></div>
-                <div class="building" style="left:130px; width:80px; height:100px; background:#a0522d;"></div>
-                <div class="building" style="left:230px; width:50px; height:70px;"></div>
-                <div class="building" style="right:100px; width:100px; height:90px; background:#696969;"></div>
-                <div class="building" style="right:30px; width:60px; height:110px; background:#778899;"></div>
-            </div>
-            <p>An interactive journey through the life of Edoardo</p>
-            <p class="blink" style="color:#f9d923; margin-top:30px;">PRESS START</p>
-            <button class="btn" onclick="startGame()">START</button>
-        </div>
-
-        <!-- LEVEL SELECT -->
-        <div id="level-select" class="screen">
-            <h1>SELECT LEVEL</h1>
-            <div style="display:flex; gap:20px; margin-top:30px;">
-                <button class="btn" id="level1-btn" onclick="startLevel(1)">LEVEL 1<br><span style="font-size:8px;">Italian Origins</span></button>
-                <button class="btn" id="level2-btn" onclick="startLevel(2)" disabled>LEVEL 2<br><span style="font-size:8px;">London Leap</span></button>
-                <button class="btn" id="level3-btn" onclick="startLevel(3)" disabled>LEVEL 3<br><span style="font-size:8px;">Life Today</span></button>
-            </div>
-        </div>
-
-        <!-- LEVEL 1: INTRO -->
-        <div id="level1-intro" class="screen">
-            <h2>LEVEL 1: THE ITALIAN ORIGINS</h2>
-            <div class="pixel-scene">
-                <div class="sun"></div>
-                <div class="building" style="left:50px; width:100px; height:80px; background:#d2691e;"></div>
-                <div class="building" style="left:170px; width:120px; height:100px; background:#8b4513;">
-                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:8px; color:#f9d923;">THE FRIENDS PUB</div>
-                </div>
-                <div class="building" style="right:50px; width:80px; height:90px; background:#a0522d;"></div>
-            </div>
-            <div class="dialogue-box">
-                <p>🇮🇹 Benvenuti in Milan! This is where Edoardo's story begins.</p>
-                <p>👨‍👩‍👦‍👦 He grew up in a big Italian family: mum, dad, younger brother Ricky (Gen Z alert), and 14 cousins!</p>
-                <p>📚 In Milan, he studied mechanical engineering while working at the family pub, "The Friends".</p>
-                <p>🍸 He even got certified as a bartender!</p>
-            </div>
-            <button class="btn" onclick="startMiniGame(1)">START MINI-GAME: PIZZA DASH</button>
-        </div>
-
-        <!-- LEVEL 1: MINI-GAME (PIZZA) -->
-        <div id="level1-game" class="screen">
-            <div id="pizza-game">
-                <div class="game-header">
-                    <span>LEVEL 1: PIZZA DASH</span>
-                    <span class="timer" id="pizza-timer">⏱️ 30s</span>
-                    <span class="score-display" id="pizza-score">Score: 0/5</span>
-                </div>
-                <div class="game-area">
-                    <p>Click a pizza, then click the cousin who wants it!</p>
-                    <div class="pizza-table" id="cousins-container"></div>
-                    <div class="pizza-belt" id="pizza-belt"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 1: STORY UNLOCK -->
-        <div id="level1-story" class="screen">
-            <h2>✨ STORY UNLOCKED ✨</h2>
-            <div class="dialogue-box">
-                <p>💭 While working at The Friends pub and studying mechanical engineering, Edoardo realised something important...</p>
-                <p>❌ He didn't enjoy mechanical engineering. At all.</p>
-                <p>🎭 So he changed direction completely and started studying DRAMA in Milan!</p>
-                <p>🎬 Stage over spreadsheets. Cue dramatic music...</p>
-            </div>
-            <button class="btn" onclick="showPhoto(1)">📸 VIEW PHOTO</button>
-            <button class="btn" onclick="unlockLevel(2)">CONTINUE →</button>
-        </div>
-
-        <!-- LEVEL 2: INTRO -->
-        <div id="level2-intro" class="screen">
-            <h2>LEVEL 2: THE LONDON LEAP</h2>
-            <div class="pixel-scene london">
-                <div class="building" style="left:30px; width:60px; height:100px; background:#8b0000;">
-                    <div style="background:#f9d923; width:20px; height:40px; position:absolute; bottom:0; left:20px;"></div>
-                </div>
-                <div class="building" style="left:110px; width:140px; height:80px; background:#696969;">
-                    <div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); font-size:6px; color:#fff;">ALRA DRAMA SCHOOL</div>
-                </div>
-                <div class="building" style="right:30px; width:100px; height:120px; background:#2f4f4f;"></div>
-                <div style="position:absolute; bottom:30px; right:200px; width:60px; height:30px; background:#cc0000; border-radius:5px;">
-                    <div style="font-size:6px; color:#fff; text-align:center; padding-top:8px;">BUS</div>
-                </div>
-            </div>
-            <div class="dialogue-box">
-                <p>🇬🇧 In 2014, at 21, Edoardo moved to London!</p>
-                <p>🎭 He worked in hospitality and attended ALRA (Academy of Live and Recorded Arts).</p>
-                <p>💷 Great experience, but London life was expensive...</p>
-                <p>📖 At 25, he discovered self-improvement: books, digital marketing, and Shopify!</p>
-            </div>
-            <button class="btn" onclick="startMiniGame(2)">START MINI-GAME: BARTENDER HUSTLE</button>
-        </div>
-
-        <!-- LEVEL 2: MINI-GAME (BARTENDER) -->
-        <div id="level2-game" class="screen">
-            <div id="bartender-game">
-                <div class="game-header">
-                    <span>LEVEL 2: BARTENDER HUSTLE</span>
-                    <span class="timer" id="bartender-timer">⏱️ 45s</span>
-                    <span class="score-display" id="bartender-score">Drinks: 0/4</span>
-                </div>
-                <div class="game-area">
-                    <p>Make the drinks! Click ingredients in order, then SERVE.</p>
-                    <div class="drink-orders" id="drink-orders"></div>
-                    <div class="ingredients" id="ingredients"></div>
-                    <div class="mixing-area" id="mixing-area">Drop ingredients here</div>
-                    <button class="btn" onclick="serveDrink()">🍸 SERVE</button>
-                    <button class="btn" onclick="clearMix()" style="font-size:10px;">CLEAR</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 2: STORY UNLOCK -->
-        <div id="level2-story" class="screen">
-            <h2>✨ STORY UNLOCKED ✨</h2>
-            <div class="dialogue-box">
-                <p>📚 At 25, Edoardo felt a bit lost but decided to invest in himself.</p>
-                <p>💻 He started a Shopify store, learned dropshipping and digital marketing.</p>
-                <p>🦠 During COVID, he doubled down on studies to leave hospitality for good.</p>
-                <p>🎉 Mission accomplished: He landed a job at DIAGEO! (Thanks, Olga!)</p>
-            </div>
-            <button class="btn" onclick="showPhoto(2)">📸 VIEW PHOTO</button>
-            <button class="btn" onclick="unlockLevel(3)">CONTINUE →</button>
-        </div>
-
-        <!-- LEVEL 3: INTRO -->
-        <div id="level3-intro" class="screen">
-            <h2>LEVEL 3: LIFE TODAY & BEYOND</h2>
-            <div class="pixel-scene modern">
-                <div style="position:absolute; top:20px; left:30px; font-size:24px;">💻</div>
-                <div style="position:absolute; top:20px; right:30px; font-size:24px;">♟️</div>
-                <div style="position:absolute; bottom:50px; left:50%; transform:translateX(-50%); font-size:32px;">🌍</div>
-                <div style="position:absolute; top:60px; left:50%; transform:translateX(-50%); font-size:10px; color:#f9d923;">🇱🇹 LITHUANIA</div>
-            </div>
-            <div class="dialogue-box">
-                <p>❤️ Edoardo has a lovely girlfriend, Reda, from Lithuania!</p>
-                <p>🗺️ Fun fact: Lithuania is Europe's flattest country. Perfect for flat-earther jokes!</p>
-                <p>🤖 He's a geek who loves AI, reads about shipwrecks (The Wager), and plays chess.</p>
-                <p>🎭 Drama isn't dead - he's joining an improv course next month!</p>
-            </div>
-            <button class="btn" onclick="startMiniGame(3)">START MINI-GAME: QUIZ OF LIFE</button>
-        </div>
-
-        <!-- LEVEL 3: MINI-GAME (QUIZ) -->
-        <div id="level3-game" class="screen">
-            <div id="quiz-game">
-                <div class="game-header">
-                    <span>LEVEL 3: QUIZ OF LIFE</span>
-                    <span class="score-display" id="quiz-score">Score: 0/6</span>
-                </div>
-                <div class="game-area">
-                    <p class="quiz-question" id="quiz-question"></p>
-                    <div class="quiz-options" id="quiz-options"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 3: STORY UNLOCK / FINALE -->
-        <div id="level3-story" class="screen">
-            <h2>🎉 CONGRATULATIONS! 🎉</h2>
-            <div class="dialogue-box">
-                <p>🏆 You've unlocked Edoardo's full story!</p>
-                <p>🇮🇹 From Milan family chaos and The Friends pub...</p>
-                <p>🇬🇧 To drama school in London, self-improvement, and career transformation...</p>
-                <p>🚀 Today: A curious, geeky, travel-loving team member at Diageo!</p>
-                <p style="color:#f9d923;">🍕 Favourite foods: Pizza, Lasagna, Carbonara, Gelato 🍨</p>
-            </div>
-            <button class="btn" onclick="showPhoto(3)">📸 VIEW FINAL PHOTOS</button>
-            <button class="btn" onclick="showScreen('start-screen')">🔄 PLAY AGAIN</button>
-        </div>
-
-        <!-- PHOTO MODAL -->
-        <div id="photo-modal" class="photo-modal">
-            <div class="photo-placeholder">
-                <p class="photo-text" id="photo-label">📷 PHOTO PLACEHOLDER</p>
-                <p class="photo-text" style="font-size:8px; margin-top:10px;" id="photo-hint">Replace with your image!</p>
-                <!-- TO ADD YOUR PHOTO: Replace the src below with your image URL or local path -->
-                <!-- <img src="your-photo.jpg" alt="Photo"> -->
-            </div>
-            <button class="btn" onclick="closePhoto()">CLOSE</button>
-        </div>
-    </div>
-
-    <script>
-        // ========== GAME STATE ==========
-        let gameState = {
-            currentLevel: 1,
-            levelsUnlocked: [true, false, false],
-            levelsComplete: [false, false, false]
-        };
-
-        // ========== SCREEN MANAGEMENT ==========
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function startGame() {
-            showScreen('level-select');
-            updateLevelButtons();
-        }
-
-        function updateLevelButtons() {
-            document.getElementById('level1-btn').disabled = !gameState.levelsUnlocked[0];
-            document.getElementById('level2-btn').disabled = !gameState.levelsUnlocked[1];
-            document.getElementById('level3-btn').disabled = !gameState.levelsUnlocked[2];
-        }
-
-        function startLevel(level) {
-            gameState.currentLevel = level;
-            showScreen(`level${level}-intro`);
-        }
-
-        function unlockLevel(level) {
-            if (level <= 3) {
-                gameState.levelsUnlocked[level - 1] = true;
-                gameState.levelsComplete[gameState.currentLevel - 1] = true;
-                if (level <= 3) {
-                    showScreen(`level${level}-intro`);
-                }
-            }
-            updateLevelButtons();
-        }
-
-        // ========== MINI-GAME LAUNCHER ==========
-        function startMiniGame(level) {
-            showScreen(`level${level}-game`);
-            if (level === 1) initPizzaGame();
-            if (level === 2) initBartenderGame();
-            if (level === 3) initQuizGame();
-        }
-
-        // ========== LEVEL 1: PIZZA GAME ==========
-        const pizzaTypes = ['🍕', '🍕', '🍕'];
-        const pizzaNames = ['Margherita', 'Pepperoni', 'Veggie'];
-        const pizzaEmoji = ['🧀', '🥓', '🥦'];
-        let pizzaScore = 0;
-        let pizzaTimer = 30;
-        let pizzaInterval;
-        let selectedPizza = null;
-        let cousinsData = [];
-
-        function initPizzaGame() {
-            pizzaScore = 0;
-            pizzaTimer = 30;
-            selectedPizza = null;
-            document.getElementById('pizza-score').textContent = `Score: 0/5`;
-            document.getElementById('pizza-timer').textContent = `⏱️ ${pizzaTimer}s`;
-            document.getElementById('pizza-timer').classList.remove('warning');
-
-            // Generate cousins
-            const container = document.getElementById('cousins-container');
-            container.innerHTML = '';
-            cousinsData = [];
-            const faces = ['👦', '👧', '👴', '👵', '👨'];
-            for (let i = 0; i < 5; i++) {
-                const wantIndex = Math.floor(Math.random() * 3);
-                cousinsData.push({ want: wantIndex, served: false });
-                container.innerHTML += `
-                    <div class="cousin" id="cousin-${i}" onclick="servePizzaToCousin(${i})">
-                        <span class="cousin-face">${faces[i]}</span>
-                        <span class="cousin-want">${pizzaEmoji[wantIndex]}</span>
-                    </div>
-                `;
-            }
-
-            // Generate pizza belt
-            const belt = document.getElementById('pizza-belt');
-            belt.innerHTML = '';
-            for (let i = 0; i < 3; i++) {
-                belt.innerHTML += `
-                    <div class="pizza-item" id="pizza-${i}" onclick="selectPizza(${i})">
-                        ${pizzaTypes[i]}${pizzaEmoji[i]}
-                    </div>
-                `;
-            }
-
-            // Start timer
-            clearInterval(pizzaInterval);
-            pizzaInterval = setInterval(() => {
-                pizzaTimer--;
-                document.getElementById('pizza-timer').textContent = `⏱️ ${pizzaTimer}s`;
-                if (pizzaTimer <= 10) {
-                    document.getElementById('pizza-timer').classList.add('warning');
-                }
-                if (pizzaTimer <= 0) {
-                    clearInterval(pizzaInterval);
-                    alert('Time's up! The family staged a pasta mutiny. Try again!');
-                    initPizzaGame();
-                }
-            }, 1000);
-        }
-
-        function selectPizza(index) {
-            document.querySelectorAll('.pizza-item').forEach(p => p.classList.remove('selected'));
-            document.getElementById(`pizza-${index}`).classList.add('selected');
-            selectedPizza = index;
-        }
-
-        function servePizzaToCousin(cousinIndex) {
-            if (selectedPizza === null) return;
-            if (cousinsData[cousinIndex].served) return;
-
-            const cousinEl = document.getElementById(`cousin-${cousinIndex}`);
-            if (cousinsData[cousinIndex].want === selectedPizza) {
-                cousinEl.classList.add('correct');
-                cousinsData[cousinIndex].served = true;
-                pizzaScore++;
-                document.getElementById('pizza-score').textContent = `Score: ${pizzaScore}/5`;
-                if (pizzaScore >= 5) {
-                    clearInterval(pizzaInterval);
-                    setTimeout(() => {
-                        alert('🎉 Perfect! All cousins are happy!');
-                        showScreen('level1-story');
-                    }, 500);
-                }
-            } else {
-                cousinEl.classList.add('wrong');
-                setTimeout(() => cousinEl.classList.remove('wrong'), 500);
-            }
-            selectedPizza = null;
-            document.querySelectorAll('.pizza-item').forEach(p => p.classList.remove('selected'));
-        }
-
-        // ========== LEVEL 2: BARTENDER GAME ==========
-        const drinks = [
-            { name: 'Beer', recipe: ['🍺'], emoji: '🍺' },
-            { name: 'G&T', recipe: ['🧊', '🍸'], emoji: '🍸' },
-            { name: 'Cocktail', recipe: ['🧊', '🍹', '🍋'], emoji: '🍹' },
-            { name: 'Coffee', recipe: ['☕'], emoji: '☕' }
-        ];
-        const allIngredients = ['🍺', '🧊', '🍸', '🍹', '🍋', '☕'];
-        let bartenderScore = 0;
-        let bartenderTimer = 45;
-        let bartenderInterval;
-        let currentMix = [];
-        let currentOrders = [];
-
-        function initBartenderGame() {
-            bartenderScore = 0;
-            bartenderTimer = 45;
-            currentMix = [];
-            document.getElementById('bartender-score').textContent = `Drinks: 0/4`;
-            document.getElementById('bartender-timer').textContent = `⏱️ ${bartenderTimer}s`;
-            document.getElementById('bartender-timer').classList.remove('warning');
-            document.getElementById('mixing-area').innerHTML = 'Drop ingredients here';
-
-            // Generate orders
-            currentOrders = [...drinks].sort(() => Math.random() - 0.5);
-            const ordersEl = document.getElementById('drink-orders');
-            ordersEl.innerHTML = '';
-            currentOrders.forEach((d, i) => {
-                ordersEl.innerHTML += `<div class="order" id="order-${i}">${d.emoji} ${d.name}</div>`;
-            });
-
-            // Generate ingredients
-            const ingredientsEl = document.getElementById('ingredients');
-            ingredientsEl.innerHTML = '';
-            allIngredients.forEach((ing, i) => {
-                ingredientsEl.innerHTML += `<div class="ingredient" onclick="addIngredient('${ing}')">${ing}</div>`;
-            });
-
-            // Start timer
-            clearInterval(bartenderInterval);
-            bartenderInterval = setInterval(() => {
-                bartenderTimer--;
-                document.getElementById('bartender-timer').textContent = `⏱️ ${bartenderTimer}s`;
-                if (bartenderTimer <= 10) {
-                    document.getElementById('bartender-timer').classList.add('warning');
-                }
-                if (bartenderTimer <= 0) {
-                    clearInterval(bartenderInterval);
-                    alert('Time's up! The manager gives you a pep talk. Try again!');
-                    initBartenderGame();
-                }
-            }, 1000);
-        }
-
-        function addIngredient(ing) {
-            if (currentMix.length < 4) {
-                currentMix.push(ing);
-                document.getElementById('mixing-area').innerHTML = currentMix.join(' ');
-            }
-        }
-
-        function clearMix() {
-            currentMix = [];
-            document.getElementById('mixing-area').innerHTML = 'Drop ingredients here';
-        }
-
-        function serveDrink() {
-            if (currentMix.length === 0) return;
-
-            // Check if mix matches any remaining order
-            for (let i = 0; i < currentOrders.length; i++) {
-                const order = currentOrders[i];
-                if (!order.done && JSON.stringify(currentMix) === JSON.stringify(order.recipe)) {
-                    order.done = true;
-                    document.getElementById(`order-${i}`).classList.add('completed');
-                    bartenderScore++;
-                    document.getElementById('bartender-score').textContent = `Drinks: ${bartenderScore}/4`;
-                    clearMix();
-                    if (bartenderScore >= 4) {
-                        clearInterval(bartenderInterval);
-                        setTimeout(() => {
-                            alert('🎉 All drinks served! You're a pro!');
-                            showScreen('level2-story');
-                        }, 500);
-                    }
-                    return;
-                }
-            }
-            alert('❌ That doesn't match any order! Try again.');
-            clearMix();
-        }
-
-        // ========== LEVEL 3: QUIZ GAME ==========
-        const quizQuestions = [
-            {
-                q: "Where is Edoardo originally from?",
-                options: ["Milan, Italy", "Rome, Italy", "Madrid, Spain"],
-                correct: 0
-            },
-            {
-                q: "What did Edoardo first study at university?",
-                options: ["Economics", "Mechanical Engineering", "Computer Science"],
-                correct: 1
-            },
-            {
-                q: "What is the name of his family pub in Milan?",
-                options: ["The Mates", "The Friends", "The Buddies"],
-                correct: 1
-            },
-            {
-                q: "What drama school did he attend in London?",
-                options: ["RADA", "ALRA", "LAMDA"],
-                correct: 1
-            },
-            {
-                q: "What is Edoardo's chess ELO goal?",
-                options: ["500", "1000", "2000"],
-                correct: 1
-            },
-            {
-                q: "What country is his girlfriend Reda from?",
-                options: ["Latvia", "Lithuania", "Estonia"],
-                correct: 1
-            }
-        ];
-        let quizIndex = 0;
-        let quizScore = 0;
-
-        function initQuizGame() {
-            quizIndex = 0;
-            quizScore = 0;
-            document.getElementById('quiz-score').textContent = `Score: 0/6`;
-            showQuizQuestion();
-        }
-
-        function showQuizQuestion() {
-            if (quizIndex >= quizQuestions.length) {
-                if (quizScore >= 4) {
-                    setTimeout(() => {
-                        alert(`🎉 Amazing! You scored ${quizScore}/6! You really know Edoardo!`);
-                        showScreen('level3-story');
-                    }, 300);
-                } else {
-                    alert(`You scored ${quizScore}/6. Let's try again!`);
-                    initQuizGame();
-                }
-                return;
-            }
-
-            const q = quizQuestions[quizIndex];
-            document.getElementById('quiz-question').textContent = `Q${quizIndex + 1}: ${q.q}`;
-            const optionsEl = document.getElementById('quiz-options');
-            optionsEl.innerHTML = '';
-            q.options.forEach((opt, i) => {
-                optionsEl.innerHTML += `<div class="quiz-option" id="opt-${i}" onclick="answerQuiz(${i})">${opt}</div>`;
-            });
-        }
-
-        function answerQuiz(index) {
-            const q = quizQuestions[quizIndex];
-            const optEl = document.getElementById(`opt-${index}`);
-            if (index === q.correct) {
-                optEl.classList.add('correct');
-                quizScore++;
-            } else {
-                optEl.classList.add('wrong');
-                document.getElementById(`opt-${q.correct}`).classList.add('correct');
-            }
-            document.getElementById('quiz-score').textContent = `Score: ${quizScore}/6`;
-
-            // Disable all options
-            document.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'none');
-
-            setTimeout(() => {
-                quizIndex++;
-                showQuizQuestion();
-            }, 1000);
-        }
-
-        // ========== PHOTO MODAL ==========
-        const photoLabels = [
-            "📷 Edoardo's Family in Milan",
-            "📷 Edoardo in London / Drama School",
-            "📷 Edoardo & Reda / Travel Adventures"
-        ];
-
-        function showPhoto(level) {
-            document.getElementById('photo-label').textContent = photoLabels[level - 1];
-            document.getElementById('photo-hint').textContent = "Replace this placeholder with your actual photo!";
-            document.getElementById('photo-modal').classList.add('active');
-        }
-
-        function closePhoto() {
-            document.getElementById('photo-modal').classList.remove('active');
-        }
-    </script>
-</body>
-</html>
+<div id="game-container">
+    <!-- START SCREEN -->
+    <div id="start-screen" class="screen active">
+        <h1>🎮 EDOARDO'S QUEST 🎮<br>
+            <span style="font-size:12px;color:#f9d923;">From Milan to Marketing</span></h1>
+        <div class="pixel-scene">
+            <div class="sun"></div>
+            <div class="building" style="left:50px;width:60px;height:80px;"></div>
+            <div class="building" style="left:130px;width:80px;height:100px;background:#a0522d;"></div>
+            <div class="building" style="left:230px;width:50px;height:70px;"></div>
+            <div class="building" s
