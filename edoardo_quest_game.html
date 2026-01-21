@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edoardo's Quest: From Milan to Marketing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            image-rendering: pixelated;
+        }
+        
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            background: #1a1a2e;
+            border: 4px solid #16213e;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        
+        .pixel-text {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        button {
+            font-family: 'Press Start 2P', cursive;
+            background: #0f3460;
+            color: #00d4ff;
+            border: 3px solid #00d4ff;
+            padding: 10px 20px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #00d4ff;
+            color: #0f3460;
+            transform: scale(1.05);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    
+    <script>
+        // GAME DATA STRUCTURE
+        const GAME_DATA = {
+            title: "Edoardo's Quest: From Milan to Marketing",
+            currentLevel: 0,
+            currentScene: 'start',
+            levelProgress: [false, false, false], // Level completion status
+            
+            levels: {
+                1: {
+                    title: "The Italian Origins",
+                    theme: "Milan family & early life",
+                    bgColor: "#8b0000",
+                    unlocked: true,
+                    scenes: {
+                        intro: {
+                            type: "dialogue",
+                            background: "milan",
+                            dialogues: [
+                                "Benvenuti in Milan! This is where Edoardo's story begins.",
+                                "He grew up in a big Italian family: mum, dad, younger brother Ricky (a full-on Gen Z character), and a lot of relatives.",
+                                "How many cousins? Fourteen. Yes, fourteen. Family gatherings were harder than beating the final boss.",
+                                "In Milan, Edoardo studied mechanical engineering while working at his family pub, The Friends, an English-style pub in the city.",
+                                "He even got certified as a bartender. But something was off... gears and equations weren't his true calling."
+                            ]
+                        },
+                        minigame: {
+                            type: "pizza_dash",
+                            title: "Family Pizza Dash",
+                            objective: "Serve the correct pizza to the correct cousin before time runs out!",
+                            timeLimit: 45,
+                            targetScore: 8,
+                            pizzaTypes: ["🍕Margherita", "🍕Pepperoni", "🍕Veggie"],
+                            failMessage: "The family has staged a pasta mutiny. Try again?"
+                        },
+                        photo: {
+                            type: "photo_spot",
+                            id: "family_milan_1",
+                            caption: "Edoardo's family in Milan",
+                            placeholder: "📸 [Family Photo Placeholder]"
+                        },
+                        outro: {
+                            type: "dialogue",
+                            background: "classroom",
+                            dialogues: [
+                                "While working at The Friends pub and studying mechanical engineering, Edoardo realised something important.",
+                                "He didn't actually enjoy mechanical engineering. At all.",
+                                "So he changed direction completely and started studying drama in Milan.",
+                                "Stage over spreadsheets. Cue dramatic music..."
+                            ]
+                        }
+                    }
+                },
+                2: {
+                    title: "The London Leap",
+                    theme: "Moving to London & drama school",
+                    bgColor: "#1a472a",
+                    unlocked: false,
+                    scenes: {
+                        intro: {
+                            type: "dialogue",
+                            background: "london",
+                            dialogues: [
+                                "In 2014, at 21, Edoardo moved to London.",
+                                "He worked in hospitality to pay the bills and got admitted to the Academy of Live and Recorded Arts (ALRA) for a full-time foundation year.",
+                                "It was an amazing experience... but London life was expensive, and acting didn't immediately pay the rent."
+                            ]
+                        },
+                        minigame: {
+                            type: "bartender",
+                            title: "Bartender Hustle - London Edition",
+                            objective: "Mix and serve drinks in the correct order!",
+                            timeLimit: 50,
+                            targetScore: 10,
+                            drinks: ["🍺Beer", "🍸G&T", "🍹Mocktail", "🥃Whisky"],
+                            failMessage: "Your cocktails confused everyone. The manager gives you a motivational talk. Try again?"
+                        },
+                        photo: {
+                            type: "photo_spot",
+                            id: "london_life_1",
+                            caption: "Edoardo in London / Drama school",
+                            placeholder: "📸 [London Life Photo Placeholder]"
+                        },
+                        outro: {
+                            type: "dialogue",
+                            background: "desk",
+                            dialogues: [
+                                "At 25, Edoardo felt a bit lost.",
+                                "He decided to work on himself: self-help books, financial education, and self-improvement.",
+                                "He started his own projects: a Shopify dropshipping store and learning digital marketing principles.",
+                                "During COVID, he doubled down on his studies, determined to leave hospitality and change career.",
+                                "Mission accomplished: he landed a job at Diageo. Special shout-out: Olga hired him.",
+                                "New chapter: from pouring drinks to driving digital performance."
+                            ]
+                        }
+                    }
+                },
+                3: {
+                    title: "Life Today & Beyond",
+                    theme: "Current life & interests",
+                    bgColor: "#1a1a4a",
+                    unlocked: false,
+                    scenes: {
+                        intro: {
+                            type: "dialogue",
+                            background: "apartment",
+                            dialogues: [
+                                "Today, Edoardo has a lovely girlfriend, Reda, from Lithuania.",
+                                "If you don't know where Lithuania is, don't worry - he couldn't point it out on a map at first either.",
+                                "Lithuania is a Baltic country in the north of Europe, known for being very flat with glacially flat terrain, low hills, and lots of forests.",
+                                "Fun fact joke: Flattest country, lots of flat-earthers.",
+                                "Beyond work, Edoardo is a geek in the best way.",
+                                "He loves new tech, especially AI, and reads both fiction and non-fiction.",
+                                "Right now he's reading a book about the British man-of-war The Wager, a ship that wrecked near Patagonia in the 18th century.",
+                                "He plays chess - still a self-described noob - but aims to reach a 1000 Elo rating this year.",
+                                "And no, he hasn't given up on drama: he's joining an improv course next month.",
+                                "With Reda, he loves to travel and eat good food."
+                            ]
+                        },
+                        minigame: {
+                            type: "quiz",
+                            title: "Quiz of Life - Meet Edoardo",
+                            objective: "Answer questions about Edoardo to fill the Friendship Meter!",
+                            questions: [
+                                {
+                                    q: "Where is Edoardo originally from?",
+                                    options: ["A: Milan, Italy", "B: Rome, Italy", "C: Madrid, Spain"],
+                                    correct: 0
+                                },
+                                {
+                                    q: "What did he first study?",
+                                    options: ["A: Mechanical engineering", "B: Economics", "C: Computer science"],
+                                    correct: 0
+                                },
+                                {
+                                    q: "What school did he attend in London?",
+                                    options: ["A: Cooking school", "B: Drama school (ALRA)", "C: Coding bootcamp"],
+                                    correct: 1
+                                },
+                                {
+                                    q: "What is his chess goal?",
+                                    options: ["A: 500 Elo", "B: 1000 Elo", "C: World champion tomorrow"],
+                                    correct: 1
+                                },
+                                {
+                                    q: "What are some favourite dishes?",
+                                    options: ["A: Pizza, lasagna, carbonara", "B: Only sushi", "C: Only salad"],
+                                    correct: 0
+                                },
+                                {
+                                    q: "What project did he start?",
+                                    options: ["A: Shopify/digital marketing", "B: Carpentry", "C: Gardening blog"],
+                                    correct: 0
+                                }
+                            ],
+                            failMessage: "Not quite! Let's try again to get to know Edoardo better."
+                        },
+                        photo: {
+                            type: "photo_spot",
+                            id: "reda_travel_1",
+                            caption: "Edoardo & Reda / Travel / Food",
+                            placeholder: "📸 [Travel & Food Photo Placeholder]"
+                        },
+                        outro: {
+                            type: "dialogue",
+                            background: "world",
+                            dialogues: [
+                                "You've now unlocked Edoardo's story.",
+                                "From Milan family chaos and The Friends pub...",
+                                "...to drama school in London, self-improvement, Shopify experiments, and a full career switch into digital marketing at Diageo.",
+                                "Today, he's a curious, geeky, travel-loving, AI-interested human who's still learning, reading, and performing (hello improv).",
+                                "And he's very excited to work with you."
+                            ]
+                        }
+                    }
+                }
+            }
+        };
+        
+        // GAME ENGINE
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let gameState = {
+            screen: 'start',
+            currentLevel: 0,
+            currentDialogue: 0,
+            levelUnlocked: [true, false, false],
+            minigameState: null,
+            score: 0,
+            time: 0,
+            blinkState: true
+        };
+        
+        // Timing
+        let lastTime = Date.now();
+        let blinkTimer = 0;
+        
+        // Input handling
+        let mouseX = 0;
+        let mouseY = 0;
+        let mouseClicked = false;
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+        
+        canvas.addEventListener('click', () => {
+            mouseClicked = true;
+        });
+        
+        // RENDERING FUNCTIONS
+        function drawPixelBackground(theme) {
+            // Base gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            
+            if (theme === 'milan') {
+                gradient.addColorStop(0, '#ff6b6b');
+                gradient.addColorStop(1, '#8b0000');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Simple building shapes
+                ctx.fillStyle = '#4a0000';
+                for (let i = 0; i < 5; i++) {
+                    ctx.fillRect(i * 180, 400, 140, 200);
+                    ctx.fillStyle = '#fff3';
+                    for (let w = 0; w < 6; w++) {
+                        ctx.fillRect(i * 180 + 20 + w * 20, 420 + Math.random() * 100, 15, 15);
+                    }
+                    ctx.fillStyle = '#4a0000';
+                }
+            } else if (theme === 'london') {
+                gradient.addColorStop(0, '#555');
+                gradient.addColorStop(1, '#1a472a');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // London buildings
+                ctx.fillStyle = '#2a2a2a';
+                for (let i = 0; i < 6; i++) {
+                    ctx.fillRect(i * 150, 350, 120, 250);
+                    ctx.fillStyle = '#ff03';
+                    for (let w = 0; w < 5; w++) {
+                        ctx.fillRect(i * 150 + 15 + w * 20, 370 + Math.random() * 150, 12, 12);
+                    }
+                    ctx.fillStyle = '#2a2a2a';
+                }
+            } else if (theme === 'apartment' || theme === 'desk') {
+                gradient.addColorStop(0, '#2a2a5a');
+                gradient.addColorStop(1, '#1a1a4a');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Modern interior
+                ctx.fillStyle = '#3a3a6a';
+                ctx.fillRect(50, 300, 700, 250);
+                ctx.fillStyle = '#4a4a8a';
+                ctx.fillRect(150, 350, 80, 120);
+                ctx.fillRect(450, 350, 80, 120);
+            } else {
+                gradient.addColorStop(0, '#1a1a2e');
+                gradient.addColorStop(1, '#0f0f1e');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        function drawText(text, x, y, size = 12, color = '#fff', align = 'left') {
+            ctx.font = `${size}px 'Press Start 2P'`;
+            ctx.fillStyle = color;
+            ctx.textAlign = align;
+            
+            // Word wrap
+            const maxWidth = canvas.width - 100;
+            const words = text.split(' ');
+            let line = '';
+            let yOffset = 0;
+            
+            for (let word of words) {
+                const testLine = line + word + ' ';
+                const metrics = ctx.measureText(testLine);
+                
+                if (metrics.width > maxWidth && line !== '') {
+                    ctx.fillText(line, x, y + yOffset);
+                    line = word + ' ';
+                    yOffset += size + 8;
+                } else {
+                    line = testLine;
+                }
+            }
+            ctx.fillText(line, x, y + yOffset);
+            return yOffset + size;
+        }
+        
+        function drawButton(text, x, y, width, height) {
+            const hover = mouseX > x && mouseX < x + width && mouseY > y && mouseY < y + height;
+            
+            ctx.fillStyle = hover ? '#00d4ff' : '#0f3460';
+            ctx.fillRect(x, y, width, height);
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, width, height);
+            
+            ctx.fillStyle = hover ? '#0f3460' : '#00d4ff';
+            ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, x + width / 2, y + height / 2 + 4);
+            
+            if (hover && mouseClicked) {
+                return true;
+            }
+            return false;
+        }
+        
+        // SCREEN RENDERERS
+        function renderStartScreen() {
+            drawPixelBackground('start');
+            
+            // Title
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = '24px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText("EDOARDO'S QUEST", canvas.width / 2, 150);
+            
+            ctx.font = '12px "Press Start 2P"';
+            ctx.fillText("From Milan to Marketing", canvas.width / 2, 190);
+            
+            // Pixel Edoardo
+            ctx.fillStyle = '#ffcc99';
+            ctx.fillRect(375, 250, 50, 70);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(385, 265, 10, 10);
+            ctx.fillRect(405, 265, 10, 10);
+            ctx.fillRect(390, 285, 20, 5);
+            
+            // Blinking text
+            if (gameState.blinkState) {
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px "Press Start 2P"';
+                ctx.fillText("PRESS START", canvas.width / 2, 450);
+            }
+            
+            if (drawButton("START", 300, 500, 200, 50)) {
+                gameState.screen = 'levelSelect';
+            }
+        }
+        
+        function renderLevelSelect() {
+            drawPixelBackground('menu');
+            
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = '20px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText("SELECT LEVEL", canvas.width / 2, 80);
+            
+            // Level buttons
+            for (let i = 1; i <= 3; i++) {
+                const level = GAME_DATA.levels[i];
+                const y = 120 + (i - 1) * 120;
+                const unlocked = gameState.levelUnlocked[i - 1];
+                
+                ctx.fillStyle = unlocked ? '#0f3460' : '#333';
+                ctx.fillRect(150, y, 500, 90);
+                ctx.strokeStyle = unlocked ? '#00d4ff' : '#666';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(150, y, 500, 90);
+                
+                if (unlocked) {
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.font = '14px "Press Start 2P"';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`LEVEL ${i}:`, 170, y + 35);
+                    ctx.font = '10px "Press Start 2P"';
+                    ctx.fillText(level.title, 170, y + 60);
+                    
+                    if (gameState.levelUnlocked[i]) {
+                        ctx.fillStyle = '#0f0';
+                        ctx.fillText("✓ COMPLETE", 520, y + 60);
+                    }
+                    
+                    const hover = mouseX > 150 && mouseX < 650 && mouseY > y && mouseY < y + 90;
+                    if (hover && mouseClicked) {
+                        startLevel(i);
+                    }
+                } else {
+                    ctx.fillStyle = '#666';
+                    ctx.font = '14px "Press Start 2P"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText("🔒 LOCKED", 400, y + 50);
+                }
+            }
+        }
+        
+        function renderDialogue() {
+            const level = GAME_DATA.levels[gameState.currentLevel];
+            const scene = gameState.currentScene;
+            const sceneData = level.scenes[scene];
+            
+            drawPixelBackground(sceneData.background);
+            
+            // Dialogue box
+            ctx.fillStyle = '#000a';
+            ctx.fillRect(50, 400, 700, 150);
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(50, 400, 700, 150);
+            
+            // Text
+            const dialogue = sceneData.dialogues[gameState.currentDialogue];
+            ctx.fillStyle = '#fff';
+            ctx.font = '11px "Press Start 2P"';
+            ctx.textAlign = 'left';
+            drawText(dialogue, 70, 430, 11);
+            
+            // Continue prompt
+            ctx.fillStyle = '#0f0';
+            ctx.font = '10px "Press Start 2P"';
+            ctx.textAlign = 'right';
+            ctx.fillText(`[${gameState.currentDialogue + 1}/${sceneData.dialogues.length}]`, 720, 530);
+            
+            if (drawButton("NEXT", 600, 500, 120, 35)) {
+                gameState.currentDialogue++;
+                
+                if (gameState.currentDialogue >= sceneData.dialogues.length) {
+                    advanceScene();
+                }
+            }
+        }
+        
+        function renderPizzaDash() {
+            drawPixelBackground('milan');
+            
+            const minigame = GAME_DATA.levels[1].scenes.minigame;
+            
+            if (!gameState.minigameState) {
+                gameState.minigameState = {
+                    time: minigame.timeLimit,
+                    score: 0,
+                    currentOrder: null,
+                    pizzas: minigame.pizzaTypes,
+                    generateNewOrder: function() {
+                        this.currentOrder = {
+                            type: this.pizzas[Math.floor(Math.random() * this.pizzas.length)],
+                            x: 100 + Math.random() * 200,
+                            y: 150
+                        };
+                    }
+                };
+                gameState.minigameState.generateNewOrder();
+            }
+            
+            const state = gameState.minigameState;
+            
+            // UI
+            ctx.fillStyle = '#000a';
+            ctx.fillRect(0, 0, canvas.width, 100);
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'left';
+            ctx.fillText(`TIME: ${Math.ceil(state.time)}s`, 50, 40);
+            ctx.fillText(`SCORE: ${state.score}/${minigame.targetScore}`, 50, 70);
+            
+            // Cousin wants pizza
+            if (state.currentOrder) {
+                ctx.fillStyle = '#ffcc99';
+                ctx.fillRect(state.currentOrder.x, state.currentOrder.y, 60, 80);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(state.currentOrder.x + 15, state.currentOrder.y + 20, 10, 10);
+                ctx.fillRect(state.currentOrder.x + 35, state.currentOrder.y + 20, 10, 10);
+                
+                // Speech bubble
+                ctx.fillStyle = '#fffa';
+                ctx.fillRect(state.currentOrder.x + 70, state.currentOrder.y + 10, 120, 40);
+                ctx.fillStyle = '#000';
+                ctx.font = '10px "Press Start 2P"';
+                ctx.textAlign = 'left';
+                ctx.fillText(state.currentOrder.type, state.currentOrder.x + 75, state.currentOrder.y + 35);
+            }
+            
+            // Pizza options
+            for (let i = 0; i < state.pizzas.length; i++) {
+                const x = 200 + i * 180;
+                const y = 400;
+                
+                if (drawButton(state.pizzas[i], x, y, 150, 60)) {
+                    if (state.currentOrder && state.pizzas[i] === state.currentOrder.type) {
+                        state.score++;
+                        state.generateNewOrder();
+                        
+                        if (state.score >= minigame.targetScore) {
+                            gameState.minigameState = null;
+                            gameState.currentScene = 'photo';
+                            gameState.currentDialogue = 0;
+                        }
+                    } else {
+                        state.time -= 5;
+                    }
+                }
+            }
+            
+            // Update time
+            state.time -= (Date.now() - lastTime) / 1000;
+            
+            if (state.time <= 0) {
+                ctx.fillStyle = '#000e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#f00';
+                ctx.font = '16px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.fillText("TIME'S UP!", canvas.width / 2, 250);
+                ctx.fillStyle = '#fff';
+                ctx.font = '11px "Press Start 2P"';
+                drawText(minigame.failMessage, canvas.width / 2, 300, 11, '#fff', 'center');
+                
+                if (drawButton("TRY AGAIN", 300, 400, 200, 50)) {
+                    gameState.minigameState = null;
+                }
+            }
+        }
+        
+        function renderBartender() {
+            drawPixelBackground('london');
+            
+            const minigame = GAME_DATA.levels[2].scenes.minigame;
+            
+            if (!gameState.minigameState) {
+                gameState.minigameState = {
+                    time: minigame.timeLimit,
+                    score: 0,
+                    currentOrder: null,
+                    drinks: minigame.drinks,
+                    generateNewOrder: function() {
+                        this.currentOrder = this.drinks[Math.floor(Math.random() * this.drinks.length)];
+                    }
+                };
+                gameState.minigameState.generateNewOrder();
+            }
+            
+            const state = gameState.minigameState;
+            
+            // UI
+            ctx.fillStyle = '#000a';
+            ctx.fillRect(0, 0, canvas.width, 100);
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'left';
+            ctx.fillText(`TIME: ${Math.ceil(state.time)}s`, 50, 40);
+            ctx.fillText(`SCORE: ${state.score}/${minigame.targetScore}`, 50, 70);
+            
+            // Current order
+            if (state.currentOrder) {
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.fillText("ORDER:", canvas.width / 2, 150);
+                ctx.fillText(state.currentOrder, canvas.width / 2, 190);
+            }
+            
+            // Drink buttons
+            for (let i = 0; i < state.drinks.length; i++) {
+                const x = 100 + i * 160;
+                const y = 350;
+                
+                if (drawButton(state.drinks[i], x, y, 140, 60)) {
+                    if (state.currentOrder && state.drinks[i] === state.currentOrder) {
+                        state.score++;
+                        state.generateNewOrder();
+                        
+                        if (state.score >= minigame.targetScore) {
+                            gameState.minigameState = null;
+                            gameState.currentScene = 'photo';
+                            gameState.currentDialogue = 0;
+                        }
+                    } else {
+                        state.time -= 3;
+                    }
+                }
+            }
+            
+            state.time -= (Date.now() - lastTime) / 1000;
+            
+            if (state.time <= 0) {
+                ctx.fillStyle = '#000e';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#f00';
+                ctx.font = '16px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.fillText("TIME'S UP!", canvas.width / 2, 250);
+                ctx.fillStyle = '#fff';
+                ctx.font = '11px "Press Start 2P"';
+                drawText(minigame.failMessage, canvas.width / 2, 300, 11, '#fff', 'center');
+                
+                if (drawButton("TRY AGAIN", 300, 400, 200, 50)) {
+                    gameState.minigameState = null;
+                }
+            }
+        }
+        
+        function renderQuiz() {
+            drawPixelBackground('apartment');
+            
+            const minigame = GAME_DATA.levels[3].scenes.minigame;
+            
+            if (!gameState.minigameState) {
+                gameState.minigameState = {
+                    currentQ: 0,
+                    score: 0,
+                    answered: false
+                };
+            }
+            
+            const state = gameState.minigameState;
+            const question = minigame.questions[state.currentQ];
+            
+            // UI
+            ctx.fillStyle = '#000a';
+            ctx.fillRect(50, 50, 700, 80);
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px "Press Start 2P"';
+            ctx.textAlign = 'center';
